@@ -20,7 +20,7 @@ type Messages struct {
 
 type BotConfig struct {
 	// From env files
-	BotToken string `mapstructure:"bot_token"`
+	Token string `mapstructure:"bot_token"`
 
 	// From config files
 	BotUrl string `mapstructure:"bot_url"`
