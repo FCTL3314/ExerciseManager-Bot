@@ -1,20 +1,9 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	"log"
-	"os"
-	"strings"
 )
-
-type EnvLoader interface {
-	LoadEnv(Path string) error
-}
-
-type YmlLoader interface {
-	LoadYml(Path string) error
-}
 
 type Responses struct {
 	CommandStart string `mapstructure:"command_start"`
@@ -31,7 +20,7 @@ type Messages struct {
 
 type BotConfig struct {
 	// From env files
-	BotToken string
+	BotToken string `mapstructure:"bot_token"`
 
 	// From config files
 	BotUrl string `mapstructure:"bot_url"`
@@ -41,36 +30,32 @@ type BotConfig struct {
 func NewBotConfig() *BotConfig {
 	bc := &BotConfig{}
 	if err := bc.LoadEnv("./.env"); err != nil {
-		log.Fatal("Error loading .env file. Check if the file exists.")
+		log.Fatal(
+			"Error loading .env file. Check that the file exists and is filled out without errors.",
+		)
 	}
 
 	if err := bc.LoadYml("configs/main.yml"); err != nil {
-		log.Fatal("Error loading config file main.yml. Check if all config files exists.")
+		log.Fatal(
+			"Error loading config file main.yml. Check that the files exist and are filled in without errors.",
+		)
 	}
 
 	return bc
 }
 
-func (bc *BotConfig) LoadEnv(Path string) error {
-	if err := godotenv.Load(Path); err != nil {
+func (bc *BotConfig) setupViper(Path string, ConfigType string) error {
+	viper.SetConfigFile(Path)
+	viper.SetConfigType(ConfigType)
+
+	if err := viper.ReadInConfig(); err != nil {
 		return err
 	}
-
-	bc.BotToken = os.Getenv("BOT_TOKEN")
-
 	return nil
 }
 
-func (bc *BotConfig) LoadYml(Path string) error {
-	parts := strings.Split(Path, "/")
-	Directory := strings.Join(parts[:len(parts)-1], "/")
-	FileName := parts[len(parts)-1]
-
-	viper.AddConfigPath(Directory)
-	viper.SetConfigName(FileName)
-	viper.SetConfigType("yml")
-
-	if err := viper.ReadInConfig(); err != nil {
+func (bc *BotConfig) loadFromFile(Path string, ConfigType string) error {
+	if err := bc.setupViper(Path, ConfigType); err != nil {
 		return err
 	}
 
@@ -78,10 +63,19 @@ func (bc *BotConfig) LoadYml(Path string) error {
 		return err
 	}
 
-	if err := viper.UnmarshalKey("messages.response", &bc.Messages.Responses); err != nil {
+	return nil
+}
+
+func (bc *BotConfig) LoadEnv(Path string) error {
+	if err := bc.loadFromFile(Path, "env"); err != nil {
 		return err
 	}
-	if err := viper.UnmarshalKey("messages.errors", &bc.Messages.Errors); err != nil {
+
+	return nil
+}
+
+func (bc *BotConfig) LoadYml(Path string) error {
+	if err := bc.loadFromFile(Path, "yml"); err != nil {
 		return err
 	}
 

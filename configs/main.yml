@@ -2,6 +2,6 @@ bot_url: "https://t.me/local_dev_test_bot"
 
 messages:
   responses:
-    command_start: "Hello!"
+    command_start: "Hello! The bot is working"
   errors:
-    default: "Unknown error"
+    default: "An unknown error occurred :\\"
