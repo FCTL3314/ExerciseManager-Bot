@@ -1,0 +1,7 @@
+bot_url: "https://t.me/local_dev_test_bot"
+
+messages:
+  responses:
+    command_start: "Hello!"
+  errors:
+    default: "Unknown error"
