@@ -2,34 +2,27 @@ package telegram
 
 import (
 	"ExerciseManagerBot/pkg/config"
+	"ExerciseManagerBot/pkg/telegram/handlers"
 	"fmt"
 	tele "gopkg.in/telebot.v3"
 )
 
 type Bot struct {
-	client *tele.Bot
-
-	messages config.Messages
+	Client *tele.Bot
+	Config *config.BotConfig
 }
 
-func NewBot(client *tele.Bot, messages config.Messages) *Bot {
+func NewBot(client *tele.Bot, config *config.BotConfig) *Bot {
 	return &Bot{
-		client:   client,
-		messages: messages,
+		Client: client,
+		Config: config,
 	}
 }
 
 func (b *Bot) Start() {
-	b.defineHandlers()
+	hm := handlers.NewManager(b.Client, b.Config)
+	hm.DefineHandlers()
 
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
-	b.client.Start()
-}
-
-func (b *Bot) defineHandlers() {
-	b.defineCommandHandlers()
-}
-
-func (b *Bot) defineCommandHandlers() {
-	b.client.Handle(startCommand, b.startCommandHandler)
+	b.Client.Start()
 }

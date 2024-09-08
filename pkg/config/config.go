@@ -7,6 +7,7 @@ import (
 
 type Responses struct {
 	CommandStart string `mapstructure:"command_start"`
+	CommandHelp  string `mapstructure:"command_help"`
 }
 
 type Errors struct {

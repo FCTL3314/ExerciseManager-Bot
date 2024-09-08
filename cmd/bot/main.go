@@ -16,7 +16,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	bot := telegram.NewBot(b, BotConfig.Messages)
+	bot := telegram.NewBot(b, BotConfig)
 	bot.Start()
 }
 
