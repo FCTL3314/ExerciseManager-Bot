@@ -10,12 +10,12 @@ type Definer interface {
 }
 
 type Manager struct {
-	client *tele.Bot
-	config *config.BotConfig
+	botClient *tele.Bot
+	config    *config.BotConfig
 }
 
-func NewDefaultManager(client *tele.Bot, config *config.BotConfig) *Manager {
-	return &Manager{client: client, config: config}
+func NewDefaultManager(botClient *tele.Bot, config *config.BotConfig) *Manager {
+	return &Manager{botClient: botClient, config: config}
 }
 
 func (m *Manager) Define() {
@@ -23,6 +23,6 @@ func (m *Manager) Define() {
 }
 
 func (m *Manager) defineCommands() {
-	m.client.Handle(StartCommand, m.startCommandHandler)
-	m.client.Handle(HelpCommand, m.helpCommandHandler)
+	m.botClient.Handle(StartCommand, m.startCommandHandler)
+	m.botClient.Handle(HelpCommand, m.helpCommandHandler)
 }

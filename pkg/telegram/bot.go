@@ -8,16 +8,16 @@ import (
 )
 
 type Bot struct {
-	Client          *tele.Bot
-	Config          *config.BotConfig
+	botClient       *tele.Bot
+	config          *config.BotConfig
 	handlersManager handlers.Definer
 }
 
-func NewBot(client *tele.Bot, config *config.BotConfig) *Bot {
-	handlersManager := handlers.NewDefaultManager(client, config)
+func NewBot(botClient *tele.Bot, config *config.BotConfig) *Bot {
+	handlersManager := handlers.NewDefaultManager(botClient, config)
 	return &Bot{
-		Client:          client,
-		Config:          config,
+		botClient:       botClient,
+		config:          config,
 		handlersManager: handlersManager,
 	}
 }
@@ -26,5 +26,5 @@ func (b *Bot) Start() {
 	b.handlersManager.Define()
 
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
-	b.Client.Start()
+	b.botClient.Start()
 }
