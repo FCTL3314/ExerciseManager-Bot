@@ -5,20 +5,24 @@ import (
 	tele "gopkg.in/telebot.v3"
 )
 
+type Definer interface {
+	Define()
+}
+
 type Manager struct {
 	client *tele.Bot
 	config *config.BotConfig
 }
 
-func NewManager(client *tele.Bot, config *config.BotConfig) *Manager {
+func NewDefaultManager(client *tele.Bot, config *config.BotConfig) *Manager {
 	return &Manager{client: client, config: config}
 }
 
-func (m *Manager) DefineHandlers() {
-	m.defineCommandHandlers()
+func (m *Manager) Define() {
+	m.defineCommands()
 }
 
-func (m *Manager) defineCommandHandlers() {
+func (m *Manager) defineCommands() {
 	m.client.Handle(StartCommand, m.startCommandHandler)
 	m.client.Handle(HelpCommand, m.helpCommandHandler)
 }
