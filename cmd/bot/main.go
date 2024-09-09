@@ -9,14 +9,14 @@ import (
 )
 
 func main() {
-	BotConfig := config.NewBotConfig()
+	botConfig := config.NewBotConfig()
 
-	b, err := initBot(BotConfig)
+	b, err := initBot(botConfig)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	bot := telegram.NewBot(b, BotConfig)
+	bot := telegram.NewBot(b, botConfig)
 	bot.Start()
 }
 
