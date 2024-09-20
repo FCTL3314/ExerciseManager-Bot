@@ -1,9 +1,9 @@
-from config.environment import EnvironmentConfigLoader
+from bootstrap.app import Bootstrap
 
 
 def main() -> None:
-    config = EnvironmentConfigLoader().load()
-    a = 1
+    app = Bootstrap().initialize_app()
+
 
 if __name__ == "__main__":
     main()
