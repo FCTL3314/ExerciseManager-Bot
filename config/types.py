@@ -7,5 +7,12 @@ class BotConfig:
 
 
 @dataclass(frozen=True)
+class RedisConfig:
+    host: str
+    port: int
+
+
+@dataclass(frozen=True)
 class EnvironmentConfig:
     bot: BotConfig
+    redis: RedisConfig
