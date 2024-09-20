@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-import aioredis
+from redis.asyncio import Redis
 
 type KeyValueType = str | int | float | bool | bytes | None
 
@@ -21,7 +21,7 @@ class IKeyValueRepository(ABC):
 
 class RedisRepository(IKeyValueRepository):
     def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0) -> None:
-        self._client = aioredis.Redis(host=host, port=port, db=db)
+        self._client = Redis(host=host, port=port, db=db)
 
     async def get(self, key: str) -> KeyValueType:
         value = await self._client.get(key)
