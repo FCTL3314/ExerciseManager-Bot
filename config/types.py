@@ -16,3 +16,8 @@ class RedisConfig:
 class EnvironmentConfig:
     bot: BotConfig
     redis: RedisConfig
+
+
+@dataclass(frozen=True)
+class Config:
+    env: EnvironmentConfig
