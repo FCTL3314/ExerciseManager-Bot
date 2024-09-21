@@ -12,3 +12,7 @@ restart_local_services: down_local_services up_local_services
 
 local_services_logs:
 	docker compose -p $(DOCKER_COMPOSE_PROJECT_NAME) -f $(LOCAL_DOCKER_COMPOSE_FILE) logs
+
+# Mypy
+typecheck:
+	mypy .
