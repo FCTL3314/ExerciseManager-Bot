@@ -3,11 +3,9 @@
   <h1>Exercise Manager - Bot</h1>
   <p>Python based telegram bot for workout reminders and tracking exercise completion, including fitness activities like calisthenics and so on.</p>
 
-[![Go](https://img.shields.io/badge/Go-1.23.1-45a3ec?style=flat-square)](https://go.dev/)
-[![Gin](https://img.shields.io/badge/Gin-1.10.0-458cec?style=flat-square)](https://github.com/gin-gonic/gin)
-[![Gorm](https://img.shields.io/badge/Gorm-1.25.12-38B6FF?style=flat-square)](https://github.com/go-gorm/gorm)
-[![Gorm](https://img.shields.io/badge/Viper-1.19.0-66BC67?style=flat-square)](https://github.com/spf13/viper)
-
+[![Python](https://img.shields.io/badge/Python-3.12-3777A7?style=flat-square)](https://www.python.org/)
+[![Aiogram](https://img.shields.io/badge/Aiogram-3.13.1-009CFB?style=flat-square)](hhttps://aiogram.dev/)
+[![Black](https://img.shields.io/badge/Style-Black-black?style=flat-square)](https://black.readthedocs.io/en/stable/)
 </div>
 
 # 📃 Notes
