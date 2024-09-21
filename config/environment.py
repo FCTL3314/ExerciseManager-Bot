@@ -1,9 +1,7 @@
-import os
 from abc import abstractmethod, ABC
 
-from dotenv import load_dotenv
+from decouple import config
 
-from config.exceptions import RedisPortIsNotDigit
 from config.types import BotConfig, EnvironmentConfig, RedisConfig
 
 
@@ -15,22 +13,19 @@ class IEnvironmentConfigLoader(ABC):
 
 class EnvironmentConfigLoader:
     def __init__(self) -> None:
-        load_dotenv()
+        config.search_path = "./"
 
     @staticmethod
     def _load_bot_config() -> BotConfig:
         return BotConfig(
-            token=os.getenv("BOT_TOKEN"),
+            token=config("BOT_TOKEN"),
         )
 
     @staticmethod
     def _load_redis_config() -> RedisConfig:
-        if not (port := os.getenv("REDIS_PORT")).isdigit():
-            raise RedisPortIsNotDigit
-
         return RedisConfig(
-            host=os.getenv("REDIS_HOST"),
-            port=int(port),
+            host=config("REDIS_HOST"),
+            port=config("REDIS_PORT", cast=int),
         )
 
     def load(self) -> EnvironmentConfig:
