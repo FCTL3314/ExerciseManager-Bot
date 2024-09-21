@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 
-from config.types import EnvironmentConfig
+from bot.types import Bot
+from config.types import Config
 from database import IKeyValueRepository
 
 
 @dataclass
 class App:
-    config: EnvironmentConfig
+    config: Config
     storage: IKeyValueRepository
+    bot: Bot

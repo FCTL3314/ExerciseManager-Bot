@@ -1,17 +1,10 @@
-from abc import abstractmethod, ABC
-
 from decouple import config
 
+from config import IEnvironmentConfigLoader
 from config.types import BotConfig, EnvironmentConfig, RedisConfig
 
 
-class IEnvironmentConfigLoader(ABC):
-
-    @abstractmethod
-    def load(self) -> EnvironmentConfig: ...
-
-
-class EnvironmentConfigLoader:
+class EnvironmentConfigLoader(IEnvironmentConfigLoader):
     def __init__(self, search_path: str = "./") -> None:
         config.search_path = search_path
 

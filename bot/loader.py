@@ -1,12 +1,15 @@
+from aiogram import Bot as ABot, Dispatcher
+from aiogram.fsm.storage.redis import RedisStorage
+
 from bot.types import Bot
-from config.types import Config
-
-from aiogram import Bot as ABot
+from config import Config
 
 
-def load(config: Config) -> Bot:
+def initialize_bot(config: Config) -> Bot:
     bot = ABot(token=config.env.bot.token)
+    storage = RedisStorage.from_url(config.env.redis.uri)
+    dp = Dispatcher(storage=storage)
     return Bot(
         client=bot,
-        dp=...,
+        dp=dp,
     )
