@@ -1,24 +1,22 @@
-from decouple import config
+from decouple import RepositoryEnv, Config
 
 from config import IEnvironmentConfigLoader
 from config.types import BotConfig, EnvironmentConfig, RedisConfig
 
 
 class EnvironmentConfigLoader(IEnvironmentConfigLoader):
-    def __init__(self, search_path: str = "./") -> None:
-        config.search_path = search_path
+    def __init__(self) -> None:
+        self._config = Config(RepositoryEnv(".env"))
 
-    @staticmethod
-    def _load_bot_config() -> BotConfig:
+    def _load_bot_config(self) -> BotConfig:
         return BotConfig(
-            token=config("BOT_TOKEN"),
+            token=self._config("BOT_TOKEN"),
         )
 
-    @staticmethod
-    def _load_redis_config() -> RedisConfig:
+    def _load_redis_config(self) -> RedisConfig:
         return RedisConfig(
-            host=config("REDIS_HOST"),
-            port=config("REDIS_PORT", cast=int),
+            host=self._config("REDIS_HOST"),
+            port=self._config("REDIS_PORT", cast=int),
         )
 
     def load(self) -> EnvironmentConfig:

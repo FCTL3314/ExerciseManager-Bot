@@ -22,8 +22,13 @@ class EnvironmentConfig:
     redis: RedisConfig
 
 @dataclass(frozen=True)
+class Logging:
+    format: str
+
+
+@dataclass(frozen=True)
 class Settings:
-    ...
+    logging: Logging
 
 @dataclass(frozen=True)
 class Config:
