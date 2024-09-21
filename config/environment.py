@@ -12,8 +12,8 @@ class IEnvironmentConfigLoader(ABC):
 
 
 class EnvironmentConfigLoader:
-    def __init__(self) -> None:
-        config.search_path = "./"
+    def __init__(self, search_path: str = "./") -> None:
+        config.search_path = search_path
 
     @staticmethod
     def _load_bot_config() -> BotConfig:

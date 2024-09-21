@@ -1,7 +1,8 @@
 from bootstrap.types import App
 from config.environment import EnvironmentConfigLoader
 from config.types import EnvironmentConfig
-from database import RedisRepository, IKeyValueRepository
+from database import IKeyValueRepository
+from database.redis import RedisRepository
 
 
 class Bootstrap:
