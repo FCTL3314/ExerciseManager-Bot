@@ -19,7 +19,7 @@ class Bootstrap:
     LOGS_BASE_DIR = Path("./logs/")
 
     @staticmethod
-    def _init_config() -> Config:
+    async def _init_config() -> Config:
         loader = ConfigLoader(
             env_loader=EnvironmentConfigLoader(),
             settings_loader=SettingsLoader(),
@@ -27,18 +27,18 @@ class Bootstrap:
         return loader.load()
 
     @staticmethod
-    def _init_storage(config: Config) -> IKeyValueRepository:
+    async def _init_storage(config: Config) -> IKeyValueRepository:
         storage = RedisRepository(
             host=config.env.redis.host, port=config.env.redis.port, db=0
         )
         return storage
 
     @staticmethod
-    def _init_token_manager(storage: IKeyValueRepository) -> ITokenManager:
+    async def _init_token_manager(storage: IKeyValueRepository) -> ITokenManager:
         return TokenManager(storage)
 
     @staticmethod
-    def _init_bot(
+    async def _init_bot(
         config: Config,
         api_client: IExerciseManagerAPIClient,
         logger_group: LoggerGroup,
@@ -48,10 +48,10 @@ class Bootstrap:
             api_client=api_client,
             logger_group=logger_group,
         )
-        return bot_loader.load()
+        return await bot_loader.load()
 
     @staticmethod
-    def _init_api_client(
+    async def _init_api_client(
         config: Config,
         token_manager: ITokenManager,
     ) -> IExerciseManagerAPIClient:
@@ -61,11 +61,11 @@ class Bootstrap:
         )
 
     @staticmethod
-    def _configure_logging() -> None:
+    async def _configure_logging() -> None:
         logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
     @classmethod
-    def __init_logger(cls, path: str, config: Config) -> logging.Logger:
+    async def __init_logger(cls, path: str, config: Config) -> logging.Logger:
         path_parts = path.split("/")
         logger_name = (path_parts[-1]).split(".")[0]
 
@@ -87,21 +87,21 @@ class Bootstrap:
 
         return logger
 
-    def _init_logger_group(self, config: Config) -> LoggerGroup:
-        general = self.__init_logger("general.log", config)
+    async def _init_logger_group(self, config: Config) -> LoggerGroup:
+        general = await self.__init_logger("general.log", config)
         return LoggerGroup(
             general=general,
         )
 
-    def initialize_app(self) -> App:
-        config = self._init_config()
-        storage = self._init_storage(config)
-        logger_group = self._init_logger_group(config)
-        token_manager = self._init_token_manager(storage)
-        api_client = self._init_api_client(config, token_manager)
-        bot = self._init_bot(config, api_client, logger_group)
+    async def initialize_app(self) -> App:
+        config = await self._init_config()
+        storage = await self._init_storage(config)
+        logger_group = await self._init_logger_group(config)
+        token_manager = await self._init_token_manager(storage)
+        api_client = await self._init_api_client(config, token_manager)
+        bot = await self._init_bot(config, api_client, logger_group)
 
-        self._configure_logging()
+        await self._configure_logging()
 
         return App(
             config=config,

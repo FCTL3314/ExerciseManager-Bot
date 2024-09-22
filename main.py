@@ -4,7 +4,7 @@ from bootstrap.app import Bootstrap
 
 
 async def main() -> None:
-    app = Bootstrap().initialize_app()
+    app = await Bootstrap().initialize_app()
     return await app.bot.dp.start_polling(app.bot.client)
 
 

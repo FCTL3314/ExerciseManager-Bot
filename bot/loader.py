@@ -6,7 +6,7 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
 
 from bootstrap.types import LoggerGroup
-from bot.handlers import router as base_router
+from bot.handlers import router as base_router, unauthorized_callback
 from bot.middlewares import APIClientMiddleware, LoggingMiddleware, ConfigMiddleware
 from bot.types import Bot
 from config import Config
@@ -15,7 +15,7 @@ from services.api.client import IExerciseManagerAPIClient
 
 class IBotLoader(ABC):
     @abstractmethod
-    def load(self) -> Bot: ...
+    async def load(self) -> Bot: ...
 
 
 class BotLoader(IBotLoader):
@@ -29,33 +29,35 @@ class BotLoader(IBotLoader):
         self._api_client = api_client
         self._logger_group = logger_group
 
-    def _create_bot(self) -> ABot:
+    async def _create_bot(self) -> ABot:
         return ABot(
             token=self._config.env.bot.token,
             default=DefaultBotProperties(parse_mode=ParseMode.HTML),
         )
 
-    def _create_storage(self) -> RedisStorage:
+    async def _create_storage(self) -> RedisStorage:
         return RedisStorage.from_url(self._config.env.redis.uri)
 
     @staticmethod
-    def _create_dispatcher(storage: RedisStorage) -> Dispatcher:
+    async def _create_dispatcher(storage: RedisStorage) -> Dispatcher:
         dp = Dispatcher(storage=storage)
         dp.include_router(base_router)
         return dp
 
-    def _init_middlewares(self, dp: Dispatcher) -> None:
+    async def _init_middlewares(self, bot: Bot, dp: Dispatcher) -> None:
         dp.message.middleware(ConfigMiddleware(self._config))
-        # NOTE: Split into different loggers for each miniapp router in the future.
         dp.message.middleware(LoggingMiddleware(self._logger_group.general))
+        await self._api_client.set_callback_on_unauthorized(
+            lambda user_id: unauthorized_callback(user_id, bot)
+        )
         dp.message.middleware(APIClientMiddleware(self._api_client))
 
-    def load(self) -> Bot:
-        bot = self._create_bot()
-        storage = self._create_storage()
-        dp = self._create_dispatcher(storage)
+    async def load(self) -> Bot:
+        bot = await self._create_bot()
+        storage = await self._create_storage()
+        dp = await self._create_dispatcher(storage)
 
-        self._init_middlewares(dp)
+        await self._init_middlewares(bot, dp)
 
         return Bot(
             client=bot,
