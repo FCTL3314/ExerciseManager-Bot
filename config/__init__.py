@@ -18,9 +18,9 @@ class ISettingsLoader(ABC):
 class ConfigLoader:
 
     def __init__(
-            self,
-            env_loader: IEnvironmentConfigLoader,
-            settings_loader: ISettingsLoader,
+        self,
+        env_loader: IEnvironmentConfigLoader,
+        settings_loader: ISettingsLoader,
     ) -> None:
         self._env_loader = env_loader
         self._settings_loader = settings_loader

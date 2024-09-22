@@ -16,7 +16,9 @@ class RedisRepository(IKeyValueRepository):
         except AttributeError:
             return value
 
-    async def set(self, key: str, value: KeyValueType, expire: int | None = None) -> None:
+    async def set(
+        self, key: str, value: KeyValueType, expire: int | None = None
+    ) -> None:
         if isinstance(value, (str, bytes)):
             await self._client.set(key, value, ex=expire)
         else:

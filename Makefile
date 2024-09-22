@@ -16,3 +16,7 @@ local_services_logs:
 # Mypy
 typecheck:
 	mypy .
+
+# Formating
+format:
+	black .

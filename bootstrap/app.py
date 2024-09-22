@@ -11,6 +11,7 @@ from config.settings import SettingsLoader
 from config.types import Config
 from database import IKeyValueRepository
 from database.redis import RedisRepository
+from services.auth.token_managers import TokenManager, ITokenManager
 
 
 class Bootstrap:
@@ -30,6 +31,11 @@ class Bootstrap:
             host=config.env.redis.host, port=config.env.redis.port, db=0
         )
         return storage
+
+    @staticmethod
+    def _init_token_manager(storage: IKeyValueRepository) -> ITokenManager:
+        token_storage = TokenManager(storage)
+        return token_storage
 
     @staticmethod
     def _init_bot(config: Config, logger_group: LoggerGroup) -> Bot:
@@ -72,6 +78,7 @@ class Bootstrap:
     def initialize_app(self) -> App:
         config = self._init_config()
         storage = self._init_storage(config)
+        token_manager = self._init_token_manager(storage)
         logger_group = self._init_logger_group(config)
         bot = self._init_bot(config, logger_group)
 
@@ -80,6 +87,7 @@ class Bootstrap:
         return App(
             config=config,
             storage=storage,
+            token_manager=token_manager,
             bot=bot,
             logger_group=logger_group,
         )
