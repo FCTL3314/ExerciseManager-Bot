@@ -43,6 +43,7 @@ class BotLoader(IBotLoader):
         dp = self._create_dispatcher(storage)
 
         dp.message.middleware(ConfigMiddleware(self._config))
+        # NOTE: Split into different loggers for each miniapp router in the future.
         dp.message.middleware(LoggingMiddleware(self._logger_group.general))
 
         return Bot(

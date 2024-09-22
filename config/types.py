@@ -5,6 +5,9 @@ from dataclasses import dataclass
 class BotConfig:
     token: str
 
+@dataclass(frozen=True)
+class APIConfig:
+    base_url: str
 
 @dataclass(frozen=True)
 class RedisConfig:
@@ -19,6 +22,7 @@ class RedisConfig:
 @dataclass(frozen=True)
 class EnvironmentConfig:
     bot: BotConfig
+    api: APIConfig
     redis: RedisConfig
 
 
