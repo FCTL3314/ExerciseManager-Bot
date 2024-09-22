@@ -2,7 +2,7 @@ import asyncio
 
 from aiogram import Router, Bot, html
 
-from bot.handlers.commands.start import router as commands_router
+from src.bot.handlers.commands.start import router as commands_router
 
 router = Router(name=__name__)
 router.include_routers(

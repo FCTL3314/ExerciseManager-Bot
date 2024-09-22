@@ -1,4 +1,4 @@
-from config.types import UserValidationConfig
+from src.config.types import UserValidationConfig
 
 
 def is_username_valid(username: str, settings: UserValidationConfig) -> bool:

@@ -2,7 +2,7 @@ from aiogram import html
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-from bot.handlers.commands import router
+from src.bot.handlers.commands import router
 
 
 @router.message(CommandStart())

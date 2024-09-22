@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from database.types import KeyValueType
+from src.database.types import KeyValueType
 
 
 class IKeyValueRepository(ABC):

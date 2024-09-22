@@ -1,6 +1,6 @@
 import asyncio
 
-from bootstrap.app import Bootstrap
+from src.bootstrap import Bootstrap
 
 
 async def main() -> None:

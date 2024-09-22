@@ -1,7 +1,7 @@
 from decouple import RepositoryEnv, Config
 
-from config import ISettingsLoader, Settings
-from config.types import LoggingSettings, ValidationSettings, UserValidationConfig
+from src.config import ISettingsLoader, Settings
+from src.config.types import LoggingSettings, ValidationSettings, UserValidationConfig
 
 
 class SettingsLoader(ISettingsLoader):

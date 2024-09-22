@@ -1,7 +1,7 @@
 from decouple import RepositoryEnv, Config
 
-from config import IEnvironmentConfigLoader
-from config.types import BotConfig, EnvironmentConfig, RedisConfig, APIConfig
+from src.config import IEnvironmentConfigLoader
+from src.config.types import BotConfig, EnvironmentConfig, RedisConfig, APIConfig
 
 
 class EnvironmentConfigLoader(IEnvironmentConfigLoader):

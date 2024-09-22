@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from config.types import Config, EnvironmentConfig, Settings
+from src.config.types import Config, EnvironmentConfig, Settings
 
 
 class IEnvironmentConfigLoader(ABC):

@@ -3,10 +3,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from bot.handlers.commands import router
-from bot.states import RegistrationStates
-from config import Settings
-from services.validators.user import is_username_valid, is_password_valid
+from src.bot.handlers.commands import router
+from src.bot.states import RegistrationStates
+from src.config import Settings
+from src.services.validators.user import is_username_valid, is_password_valid
 
 
 @router.message(Command("register"))

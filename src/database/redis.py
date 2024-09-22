@@ -1,6 +1,6 @@
 from redis.asyncio import Redis
 
-from database import IKeyValueRepository, KeyValueType
+from src.database import IKeyValueRepository, KeyValueType
 
 
 class RedisRepository(IKeyValueRepository):

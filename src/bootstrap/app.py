@@ -2,17 +2,16 @@ import logging
 import sys
 from pathlib import Path
 
-from bootstrap.types import App, LoggerGroup
-from bot.loader import BotLoader
-from bot.types import Bot
-from config import ConfigLoader
-from config.environment import EnvironmentConfigLoader
-from config.settings import SettingsLoader
-from config.types import Config
-from database import IKeyValueRepository
-from database.redis import RedisRepository
-from services.api.client import IExerciseManagerAPIClient, ExerciseManagerAPIClient
-from services.auth.token_managers import TokenManager, ITokenManager
+from src.bootstrap.types import App, LoggerGroup
+from src.bot.loader import BotLoader
+from src.bot.types import Bot
+from src.config import ConfigLoader
+from src.config.environment import EnvironmentConfigLoader
+from src.config.settings import SettingsLoader
+from src.config.types import Config
+from src.database import IKeyValueRepository
+from src.database.redis import RedisRepository
+from src.services.auth.token_manager import TokenManager, ITokenManager
 
 
 class Bootstrap:
@@ -40,25 +39,14 @@ class Bootstrap:
     @staticmethod
     async def _init_bot(
         config: Config,
-        api_client: IExerciseManagerAPIClient,
         logger_group: LoggerGroup,
     ) -> Bot:
         bot_loader = BotLoader(
             config=config,
-            api_client=api_client,
             logger_group=logger_group,
         )
         return await bot_loader.load()
 
-    @staticmethod
-    async def _init_api_client(
-        config: Config,
-        token_manager: ITokenManager,
-    ) -> IExerciseManagerAPIClient:
-        return ExerciseManagerAPIClient(
-            base_url=config.env.api.base_url,
-            token_manager=token_manager,
-        )
 
     @staticmethod
     async def _configure_logging() -> None:
@@ -98,8 +86,7 @@ class Bootstrap:
         storage = await self._init_storage(config)
         logger_group = await self._init_logger_group(config)
         token_manager = await self._init_token_manager(storage)
-        api_client = await self._init_api_client(config, token_manager)
-        bot = await self._init_bot(config, api_client, logger_group)
+        bot = await self._init_bot(config, logger_group)
 
         await self._configure_logging()
 

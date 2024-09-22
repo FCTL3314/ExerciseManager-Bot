@@ -4,3 +4,4 @@ python-decouple==3.8
 mypy==1.11.2
 black==24.8.0
 aiohttp[speedups]==3.10.5
+pydantic==2.9.2
