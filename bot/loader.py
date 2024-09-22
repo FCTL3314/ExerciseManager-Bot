@@ -1,5 +1,3 @@
-import logging
-import sys
 from abc import ABC, abstractmethod
 
 from aiogram import Bot as ABot, Dispatcher
