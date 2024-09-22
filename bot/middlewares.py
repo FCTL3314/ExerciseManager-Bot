@@ -4,7 +4,6 @@ from typing import Any, Awaitable, Callable
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from aiogram.types import TelegramObject
 
-from bootstrap.types import LoggerGroup
 from config import Config
 
 
@@ -20,6 +19,8 @@ class ConfigMiddleware(BaseMiddleware):
         data: dict,
     ) -> Any:
         data["config"] = self.config
+        data["env"] = self.config.env
+        data["settings"] = self.config.settings
         return await handler(event, data)
 
 
@@ -36,4 +37,3 @@ class LoggingMiddleware(BaseMiddleware):
     ) -> Any:
         data["logger"] = self.logger
         return await handler(event, data)
-

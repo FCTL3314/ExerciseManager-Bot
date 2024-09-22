@@ -21,14 +21,31 @@ class EnvironmentConfig:
     bot: BotConfig
     redis: RedisConfig
 
+
 @dataclass(frozen=True)
-class Logging:
+class LoggingSettings:
     format: str
 
 
 @dataclass(frozen=True)
+class UserValidationConfig:
+    username_max_length: int
+    username_min_length: int
+
+    password_max_length: int
+    password_min_length: int
+
+
+@dataclass(frozen=True)
+class ValidationSettings:
+    user: UserValidationConfig
+
+
+@dataclass(frozen=True)
 class Settings:
-    logging: Logging
+    logging: LoggingSettings
+    validation: ValidationSettings
+
 
 @dataclass(frozen=True)
 class Config:

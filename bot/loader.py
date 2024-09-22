@@ -41,8 +41,10 @@ class BotLoader(IBotLoader):
         bot = self._create_bot()
         storage = self._create_storage()
         dp = self._create_dispatcher(storage)
+
         dp.message.middleware(ConfigMiddleware(self._config))
         dp.message.middleware(LoggingMiddleware(self._logger_group.general))
+
         return Bot(
             client=bot,
             dp=dp,
