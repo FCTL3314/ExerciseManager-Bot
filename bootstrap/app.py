@@ -38,13 +38,27 @@ class Bootstrap:
         return TokenManager(storage)
 
     @staticmethod
-    def _init_bot(config: Config, logger_group: LoggerGroup) -> Bot:
-        bot_loader = BotLoader(config=config, logger_group=logger_group)
+    def _init_bot(
+        config: Config,
+        api_client: IExerciseManagerAPIClient,
+        logger_group: LoggerGroup,
+    ) -> Bot:
+        bot_loader = BotLoader(
+            config=config,
+            api_client=api_client,
+            logger_group=logger_group,
+        )
         return bot_loader.load()
 
     @staticmethod
-    def _init_api_client(config: Config) -> IExerciseManagerAPIClient:
-        return ExerciseManagerAPIClient(base_url=config.env.api.base_url)
+    def _init_api_client(
+        config: Config,
+        token_manager: ITokenManager,
+    ) -> IExerciseManagerAPIClient:
+        return ExerciseManagerAPIClient(
+            base_url=config.env.api.base_url,
+            token_manager=token_manager,
+        )
 
     @staticmethod
     def _configure_logging() -> None:
@@ -82,18 +96,16 @@ class Bootstrap:
     def initialize_app(self) -> App:
         config = self._init_config()
         storage = self._init_storage(config)
-        token_manager = self._init_token_manager(storage)
         logger_group = self._init_logger_group(config)
-        bot = self._init_bot(config, logger_group)
-        api_client = self._init_api_client(config)
+        token_manager = self._init_token_manager(storage)
+        api_client = self._init_api_client(config, token_manager)
+        bot = self._init_bot(config, api_client, logger_group)
 
         self._configure_logging()
 
         return App(
             config=config,
             storage=storage,
-            token_manager=token_manager,
-            bot=bot,
-            api_client=api_client,
             logger_group=logger_group,
+            bot=bot,
         )
