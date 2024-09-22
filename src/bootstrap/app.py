@@ -2,7 +2,7 @@ import logging
 import sys
 from pathlib import Path
 
-from src.bootstrap.types import App, LoggerGroup
+from src.bootstrap.types import App, LoggerGroup, Services
 from src.bot.loader import BotLoader
 from src.bot.types import Bot
 from src.config import ConfigLoader
@@ -11,6 +11,8 @@ from src.config.settings import SettingsLoader
 from src.config.types import Config
 from src.database import IKeyValueRepository
 from src.database.redis import RedisRepository
+from src.services.api.auth import AuthAPIClient
+from src.services.business.auth import AuthService
 from src.services.business.token_manager import TokenManager, ITokenManager
 
 
@@ -40,10 +42,12 @@ class Bootstrap:
     async def _init_bot(
         config: Config,
         logger_group: LoggerGroup,
+            services: Services,
     ) -> Bot:
         bot_loader = BotLoader(
             config=config,
             logger_group=logger_group,
+            services=services,
         )
         return await bot_loader.load()
 
@@ -81,12 +85,22 @@ class Bootstrap:
             general=general,
         )
 
+    @staticmethod
+    async def _init_services(config: Config, token_manager: ITokenManager) -> Services:
+        auth_api_client = AuthAPIClient(base_url=config.env.api.base_url)
+        auth_service = AuthService(auth_api_client, token_manager)
+
+        return Services(
+            auth=auth_service,
+        )
+
     async def initialize_app(self) -> App:
         config = await self._init_config()
         storage = await self._init_storage(config)
         logger_group = await self._init_logger_group(config)
         token_manager = await self._init_token_manager(storage)
-        bot = await self._init_bot(config, logger_group)
+        services = await self._init_services(config, token_manager)
+        bot = await self._init_bot(config, logger_group, services)
 
         await self._configure_logging()
 
@@ -94,5 +108,6 @@ class Bootstrap:
             config=config,
             storage=storage,
             logger_group=logger_group,
+            services=services,
             bot=bot,
         )

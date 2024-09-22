@@ -20,7 +20,7 @@ class AuthAPIClient(IAuthAPIClient):
 
     async def register(self, username: str, password: str) -> User:
         response = await self.request(
-            "POST", "users/create/", data={"username": username, "password": password}
+            "POST", "users/", data={"username": username, "password": password}
         )
         data = await response.json()
         return User(**data)

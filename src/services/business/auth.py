@@ -10,13 +10,13 @@ class IAuthService(ABC):
     async def register(self, username: str, password: str) -> User: ...
 
     @abstractmethod
-    async def login(self, username: str, password: str) -> bool: ...
+    async def login(self, user_id: str, username: str, password: str) -> bool: ...
 
     @abstractmethod
     async def refresh_tokens(self, refresh_token: str) -> bool: ...
 
 
-class AuthService:
+class AuthService(IAuthService):
     def __init__(
         self, api_client: IAuthAPIClient, token_manager: ITokenManager
     ) -> None:

@@ -6,6 +6,7 @@ from aiogram.types import Message
 from src.bot.handlers.commands import router
 from src.bot.states import RegistrationStates
 from src.config import Settings
+from src.services.business.auth import IAuthService
 from src.services.validators.user import is_username_valid, is_password_valid
 
 
@@ -64,7 +65,9 @@ async def process_password(
 
 
 @router.message(RegistrationStates.password_retype)
-async def process_password_retype(message: Message, state: FSMContext) -> None:
+async def process_password_retype(
+        message: Message, state: FSMContext, auth_service: IAuthService
+) -> None:
     retyped_password = message.text.strip()
     data = await state.get_data()
     original_password = data.get("password")
@@ -75,10 +78,17 @@ async def process_password_retype(message: Message, state: FSMContext) -> None:
         )
         await state.set_state(RegistrationStates.password)
     else:
-        await state.clear()
         await message.answer("Пароль подтвержден! ✅")
+
+        data = await state.get_data()
+        username = data["username"]
+        password = data["password"]
+        # TODO: Add status 409 handling
+        await auth_service.register(username, password)
+
         await message.answer(
             "Регистрация успешно завершена! 🎉\n\n"
             "Теперь вы можете использовать свои данные для входа в систему. "
             f"Если возникнут вопросы, напишите команду {html.bold("/help")}."
         )
+        await state.clear()

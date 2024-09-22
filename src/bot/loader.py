@@ -5,9 +5,9 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.redis import RedisStorage
 
-from src.bootstrap.types import LoggerGroup
+from src.bootstrap.types import LoggerGroup, Services
 from src.bot.handlers import router as base_router
-from src.bot.middlewares import LoggingMiddleware, ConfigMiddleware
+from src.bot.middlewares import LoggingMiddleware, ConfigMiddleware, ServicesMiddleware
 from src.bot.types import Bot
 from src.config import Config
 
@@ -22,9 +22,11 @@ class BotLoader(IBotLoader):
         self,
         config: Config,
         logger_group: LoggerGroup,
+        services: Services,
     ) -> None:
         self._config = config
         self._logger_group = logger_group
+        self._services = services
 
     async def _create_bot(self) -> ABot:
         return ABot(
@@ -44,6 +46,7 @@ class BotLoader(IBotLoader):
     async def _init_middlewares(self, dp: Dispatcher) -> None:
         dp.message.middleware(ConfigMiddleware(self._config))
         dp.update.outer_middleware(LoggingMiddleware(self._logger_group.general))
+        dp.message.middleware(ServicesMiddleware(self._services))
 
     async def load(self) -> Bot:
         bot = await self._create_bot()

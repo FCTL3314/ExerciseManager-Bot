@@ -4,6 +4,7 @@ from typing import Any, Awaitable, Callable
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from aiogram.types import TelegramObject
 
+from src.bootstrap.types import Services
 from src.config import Config
 
 
@@ -37,3 +38,19 @@ class LoggingMiddleware(BaseMiddleware):
     ) -> Any:
         data["logger"] = self.logger
         return await handler(event, data)
+
+class ServicesMiddleware(BaseMiddleware):
+    def __init__(self, services: Services) -> None:
+        super().__init__()
+        self.services = services
+
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, dict], Awaitable[Any]],
+        event: TelegramObject,
+        data: dict,
+    ) -> Any:
+        data["services"] = self.services
+        data["auth_service"] = self.services.auth
+        return await handler(event, data)
+
