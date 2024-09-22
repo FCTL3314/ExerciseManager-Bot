@@ -11,6 +11,7 @@ from config.settings import SettingsLoader
 from config.types import Config
 from database import IKeyValueRepository
 from database.redis import RedisRepository
+from services.api.client import IExerciseManagerAPIClient, ExerciseManagerAPIClient
 from services.auth.token_managers import TokenManager, ITokenManager
 
 
@@ -34,13 +35,16 @@ class Bootstrap:
 
     @staticmethod
     def _init_token_manager(storage: IKeyValueRepository) -> ITokenManager:
-        token_storage = TokenManager(storage)
-        return token_storage
+        return TokenManager(storage)
 
     @staticmethod
     def _init_bot(config: Config, logger_group: LoggerGroup) -> Bot:
         bot_loader = BotLoader(config=config, logger_group=logger_group)
         return bot_loader.load()
+
+    @staticmethod
+    def _init_api_client(config: Config) -> IExerciseManagerAPIClient:
+        return ExerciseManagerAPIClient(base_url=config.env.api.base_url)
 
     @staticmethod
     def _configure_logging() -> None:
@@ -81,6 +85,7 @@ class Bootstrap:
         token_manager = self._init_token_manager(storage)
         logger_group = self._init_logger_group(config)
         bot = self._init_bot(config, logger_group)
+        api_client = self._init_api_client(config)
 
         self._configure_logging()
 
@@ -89,5 +94,6 @@ class Bootstrap:
             storage=storage,
             token_manager=token_manager,
             bot=bot,
+            api_client=api_client,
             logger_group=logger_group,
         )
