@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from src.database import IKeyValueRepository
-from src.services.auth.enums import TokenType
+from src.services.business.enums import TokenType
 
 
 class ITokenManager(ABC):

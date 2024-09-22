@@ -43,7 +43,7 @@ class BotLoader(IBotLoader):
 
     async def _init_middlewares(self, dp: Dispatcher) -> None:
         dp.message.middleware(ConfigMiddleware(self._config))
-        dp.message.middleware(LoggingMiddleware(self._logger_group.general))
+        dp.update.outer_middleware(LoggingMiddleware(self._logger_group.general))
 
     async def load(self) -> Bot:
         bot = await self._create_bot()

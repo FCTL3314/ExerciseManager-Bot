@@ -11,7 +11,7 @@ from src.config.settings import SettingsLoader
 from src.config.types import Config
 from src.database import IKeyValueRepository
 from src.database.redis import RedisRepository
-from src.services.auth.token_manager import TokenManager, ITokenManager
+from src.services.business.token_manager import TokenManager, ITokenManager
 
 
 class Bootstrap:

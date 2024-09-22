@@ -1,16 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
+from src.models.user import User
 from src.services.api.auth import IAuthAPIClient
 from src.services.business.token_manager import ITokenManager
 
 
 class IAuthService(ABC):
     @abstractmethod
-    async def register(self, username: str, password: str) -> dict[str, Any]: ...
+    async def register(self, username: str, password: str) -> User: ...
 
     @abstractmethod
-    async def login(self, username: str, password: str) -> dict[str, Any]: ...
+    async def login(self, username: str, password: str) -> bool: ...
 
     @abstractmethod
     async def refresh_tokens(self, refresh_token: str) -> bool: ...
@@ -23,9 +23,16 @@ class AuthService:
         self._api_client = api_client
         self._token_manager = token_manager
 
-    async def register(self, username: str, password: str) -> dict[str, Any]: ...
+    async def register(self, username: str, password: str) -> User:
+        return await self._api_client.register(username, password)
 
-    async def login(self, username: str, password: str) -> dict[str, Any]: ...
+    async def login(self, user_id: str, username: str, password: str) -> bool:
+        tokens_response = await self._api_client.login(username, password)
+
+        await self._token_manager.save_tokens(
+            user_id, tokens_response.access_token, tokens_response.refresh_token
+        )
+        return True
 
     async def refresh_tokens(self, user_id: str) -> bool:
         refresh_token = await self._token_manager.get_refresh_token(user_id)
@@ -33,8 +40,8 @@ class AuthService:
         if refresh_token is None:
             return False
 
-        refresh_response = await self._api_client.refresh_tokens(refresh_token)
+        tokens_response = await self._api_client.refresh_tokens(refresh_token)
         await self._token_manager.save_tokens(
-            user_id, refresh_response.access_token, refresh_response.refresh_token
+            user_id, tokens_response.access_token, tokens_response.refresh_token
         )
         return True
