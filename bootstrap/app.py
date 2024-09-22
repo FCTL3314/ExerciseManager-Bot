@@ -32,8 +32,8 @@ class Bootstrap:
         return storage
 
     @staticmethod
-    def _init_bot(config: Config) -> Bot:
-        bot_loader = BotLoader(config=config)
+    def _init_bot(config: Config, logger_group: LoggerGroup) -> Bot:
+        bot_loader = BotLoader(config=config, logger_group=logger_group)
         return bot_loader.load()
 
     @staticmethod
@@ -72,8 +72,8 @@ class Bootstrap:
     def initialize_app(self) -> App:
         config = self._init_config()
         storage = self._init_storage(config)
-        bot = self._init_bot(config)
         logger_group = self._init_logger_group(config)
+        bot = self._init_bot(config, logger_group)
 
         self._configure_logging()
 

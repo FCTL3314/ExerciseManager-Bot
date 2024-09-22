@@ -1,3 +1,5 @@
+from logging import Logger
+
 from aiogram import html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
