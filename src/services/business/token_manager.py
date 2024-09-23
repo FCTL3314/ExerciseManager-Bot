@@ -39,9 +39,9 @@ class TokenManager(ITokenManager):
 
     async def _get_key(self, user_id: str | int, token_type: TokenType) -> str:
         key = self._key_pattern.format(user_id=user_id)
-        if token_type.ACCESS:
+        if token_type == TokenType.ACCESS:
             key += "__access_token"
-        elif token_type.REFRESH:
+        elif token_type == TokenType.REFRESH:
             key += "__refresh_token"
         return key
 

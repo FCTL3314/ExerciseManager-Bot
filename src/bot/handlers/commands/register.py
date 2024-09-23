@@ -3,15 +3,15 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src.bot.handlers.commands import (
-    router,
-    REGISTER_COMMAND,
-    LOGIN_COMMAND,
-    HELP_COMMAND,
-)
+from src.bot.handlers.commands import router
 from src.bot.message_templates import (
     INVALID_USERNAME_TEMPLATE,
     INVALID_PASSWORD_TEMPLATE,
+)
+from src.bot.shurtcuts.commands import (
+    REGISTER_COMMAND,
+    LOGIN_COMMAND,
+    HELP_COMMAND,
 )
 from src.bot.states import RegistrationStates
 from src.config import Settings
@@ -20,7 +20,7 @@ from src.services.business.exceptions import PasswordsDoNotMatchError
 from src.services.validators.user import is_username_valid, is_password_valid
 
 
-@router.message(Command(REGISTER_COMMAND))
+@router.message(Command(REGISTER_COMMAND.name))
 async def command_register_handler(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
@@ -89,8 +89,8 @@ async def process_password_retype(
         await auth_service.register(username, original_password, retyped_password)
         await message.answer(
             "Регистрация успешно завершена! 🎉\n\n"
-            f"Теперь вы можете использовать свои данные для входа в систему ({html.bold(f"/{LOGIN_COMMAND}")}). "
-            f"Если возникнут вопросы, напишите команду {html.bold(f"/{HELP_COMMAND}")}."
+            f"Теперь вы можете использовать свои данные для входа в систему ({html.bold(LOGIN_COMMAND)}. "
+            f"Если возникнут вопросы, напишите команду {html.bold(HELP_COMMAND)}."
         )
         await state.clear()
     except PasswordsDoNotMatchError:

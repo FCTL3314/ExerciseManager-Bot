@@ -1,23 +1,25 @@
+from aiogram import html
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src.bot.handlers.commands import router, LOGIN_COMMAND
+from src.bot.handlers.commands import router
 from src.bot.message_templates import (
     INVALID_USERNAME_TEMPLATE,
     INVALID_PASSWORD_TEMPLATE,
 )
+from src.bot.shurtcuts.commands import LOGIN_COMMAND
 from src.bot.states import LoginStates
 from src.config import Settings
 from src.services.business.auth import IAuthService
 from src.services.validators.user import is_username_valid, is_password_valid
 
 
-@router.message(Command(LOGIN_COMMAND))
+@router.message(Command(LOGIN_COMMAND.name))
 async def command_login_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(LoginStates.username)
     await message.answer(
-        "🛂 Добро пожаловать в процесс входа в систему!\n\n"
+        "👤 Добро пожаловать в процесс входа в систему!\n\n"
         "1️⃣ Пожалуйста, введите ваше имя пользователя:"
     )
 
@@ -64,10 +66,10 @@ async def process_password(
 
     is_success = await auth_service.login(message.from_user.id, username, password)
     if is_success:
-        await message.answer("✅ Вы успешно вошли в систему! 🎉")
+        await message.answer("🎉 Вы успешно вошли в систему!")
         await state.clear()
     else:
         await message.answer(
-            "❌ Неправильное имя пользователя или пароль. Пожалуйста, попробуйте снова."
+            f"❌ Неправильное имя пользователя или пароль. Пожалуйста, попробуйте снова ({html.bold(LOGIN_COMMAND)})."
         )
         await state.clear()
