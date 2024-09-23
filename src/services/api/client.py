@@ -3,7 +3,6 @@ from typing import Any
 from urllib.parse import urljoin
 
 from aiogram.client.session import aiohttp
-from aiohttp import ClientResponse
 
 
 class APIClient:
@@ -20,14 +19,14 @@ class APIClient:
         data: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         **kwargs,
-    ) -> ClientResponse:
+    ) -> dict[str, Any]:
         url = urljoin(self._base_url, endpoint)
         async with self._session.request(
             method, url, json=data, params=params, **kwargs
         ) as response:
             status = HTTPStatus(response.status)
             if status.is_success:
-                return response
+                return await response.json()
             response.raise_for_status()
 
 

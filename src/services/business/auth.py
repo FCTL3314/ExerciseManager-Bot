@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+from src.services.business.exceptions import PasswordsDoNotMatchError
 from src.models.user import User
 from src.services.api.auth import IAuthAPIClient
 from src.services.business.token_manager import ITokenManager
@@ -7,7 +8,7 @@ from src.services.business.token_manager import ITokenManager
 
 class IAuthService(ABC):
     @abstractmethod
-    async def register(self, username: str, password: str) -> User: ...
+    async def register(self, username: str, password: str, retyped_password: str) -> User: ...
 
     @abstractmethod
     async def login(self, user_id: str, username: str, password: str) -> bool: ...
@@ -23,7 +24,10 @@ class AuthService(IAuthService):
         self._api_client = api_client
         self._token_manager = token_manager
 
-    async def register(self, username: str, password: str) -> User:
+    async def register(self, username: str, password: str, retyped_password: str) -> User:
+        if retyped_password != password:
+            raise PasswordsDoNotMatchError
+
         return await self._api_client.register(username, password)
 
     async def login(self, user_id: str, username: str, password: str) -> bool:

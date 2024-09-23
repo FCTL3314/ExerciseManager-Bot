@@ -19,22 +19,19 @@ class IAuthAPIClient(APIClient, ABC):
 class AuthAPIClient(IAuthAPIClient):
 
     async def register(self, username: str, password: str) -> User:
-        response = await self.request(
+        data = await self.request(
             "POST", "users/", data={"username": username, "password": password}
         )
-        data = await response.json()
         return User(**data)
 
     async def login(self, username: str, password: str) -> TokensResponse:
-        response = await self.request(
+        data = await self.request(
             "POST", "users/login/", data={"username": username, "password": password}
         )
-        data = await response.json()
         return TokensResponse(**data)
 
     async def refresh_tokens(self, refresh_token: str) -> TokensResponse:
-        response = await self.request(
+        data = await self.request(
             "POST", "users/refresh/", data={"refresh_token": refresh_token}
         )
-        data = await response.json()
         return TokensResponse(**data)
