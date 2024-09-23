@@ -5,3 +5,9 @@ class RegistrationStates(StatesGroup):
     username = State()
     password = State()
     password_retype = State()
+
+
+class LoginStates(StatesGroup):
+    username = State()
+    password = State()
+

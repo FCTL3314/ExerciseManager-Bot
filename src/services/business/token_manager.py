@@ -7,10 +7,10 @@ from src.services.business.enums import TokenType
 class ITokenManager(ABC):
 
     @abstractmethod
-    async def get_access_token(self, user_id: str | int) -> str: ...
+    async def get_access_token(self, user_id: str | int) -> str | None: ...
 
     @abstractmethod
-    async def get_refresh_token(self, user_id: str | int) -> str: ...
+    async def get_refresh_token(self, user_id: str | int) -> str | None: ...
 
     @abstractmethod
     async def save_access_token(
@@ -45,11 +45,11 @@ class TokenManager(ITokenManager):
             key += "__refresh_token"
         return key
 
-    async def get_access_token(self, user_id: str | int) -> str:
+    async def get_access_token(self, user_id: str | int) -> str | None:
         key = await self._get_key(user_id, TokenType.ACCESS)
         return await self._storage.get(key)
 
-    async def get_refresh_token(self, user_id: str | int) -> str:
+    async def get_refresh_token(self, user_id: str | int) -> str | None:
         key = await self._get_key(user_id, TokenType.REFRESH)
         return await self._storage.get(key)
 

@@ -3,7 +3,16 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src.bot.handlers.commands import router
+from src.bot.handlers.commands import (
+    router,
+    REGISTER_COMMAND,
+    LOGIN_COMMAND,
+    HELP_COMMAND,
+)
+from src.bot.message_templates import (
+    INVALID_USERNAME_TEMPLATE,
+    INVALID_PASSWORD_TEMPLATE,
+)
 from src.bot.states import RegistrationStates
 from src.config import Settings
 from src.services.business.auth import IAuthService
@@ -11,7 +20,7 @@ from src.services.business.exceptions import PasswordsDoNotMatchError
 from src.services.validators.user import is_username_valid, is_password_valid
 
 
-@router.message(Command("register"))
+@router.message(Command(REGISTER_COMMAND))
 async def command_register_handler(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
@@ -31,10 +40,10 @@ async def process_username(
     username = message.text.strip()
     if not is_username_valid(username, settings.validation.user):
         await message.answer(
-            f"❌ Имя пользователя должно быть от "
-            f"{settings.validation.user.username_min_length} до "
-            f"{settings.validation.user.username_max_length} символов. "
-            f"Пожалуйста, попробуйте снова:"
+            INVALID_USERNAME_TEMPLATE.format(
+                min_length=settings.validation.user.username_min_length,
+                max_length=settings.validation.user.username_max_length,
+            ),
         )
         return
 
@@ -54,9 +63,10 @@ async def process_password(
     password = message.text.strip()
     if not is_password_valid(password, settings.validation.user):
         await message.answer(
-            f"❌ Пароль должен быть от {settings.validation.user.password_min_length} "
-            f"до {settings.validation.user.password_max_length} символов. "
-            f"Пожалуйста, попробуйте снова:"
+            INVALID_PASSWORD_TEMPLATE.format(
+                min_length=settings.validation.user.username_min_length,
+                max_length=settings.validation.user.username_max_length,
+            ),
         )
         return
 
@@ -67,7 +77,7 @@ async def process_password(
 
 @router.message(RegistrationStates.password_retype)
 async def process_password_retype(
-        message: Message, state: FSMContext, auth_service: IAuthService
+    message: Message, state: FSMContext, auth_service: IAuthService
 ) -> None:
     data = await state.get_data()
 
@@ -79,8 +89,8 @@ async def process_password_retype(
         await auth_service.register(username, original_password, retyped_password)
         await message.answer(
             "Регистрация успешно завершена! 🎉\n\n"
-            f"Теперь вы можете использовать свои данные для входа в систему ({html.bold("/login")}). "
-            f"Если возникнут вопросы, напишите команду {html.bold("/help")}."
+            f"Теперь вы можете использовать свои данные для входа в систему ({html.bold(f"/{LOGIN_COMMAND}")}). "
+            f"Если возникнут вопросы, напишите команду {html.bold(f"/{HELP_COMMAND}")}."
         )
         await state.clear()
     except PasswordsDoNotMatchError:
