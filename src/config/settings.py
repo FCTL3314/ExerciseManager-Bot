@@ -1,7 +1,12 @@
 from decouple import RepositoryEnv, Config
 
 from src.config import ISettingsLoader, Settings
-from src.config.types import LoggingSettings, ValidationSettings, UserValidationConfig
+from src.config.types import (
+    LoggingSettings,
+    ValidationSettings,
+    UserValidationConfig,
+    LocalizationSettings,
+)
 
 
 class SettingsLoader(ISettingsLoader):
@@ -26,10 +31,19 @@ class SettingsLoader(ISettingsLoader):
             user=user_validation_config,
         )
 
+    def _load_localization(self) -> LocalizationSettings:
+        return LocalizationSettings(
+            locales_path=self._config("LOCALIZATION_LOCALES_PATH"),
+            default_locale=self._config("LOCALIZATION_DEFAULT_LOCALE"),
+            domain=self._config("LOCALIZATION_DOMAIN")
+        )
+
     def load(self) -> Settings:
         logging = self._load_logging()
         validation = self._load_validation()
+        localization = self._load_localization()
         return Settings(
             logging=logging,
             validation=validation,
+            localization=localization,
         )

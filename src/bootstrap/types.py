@@ -7,15 +7,17 @@ from src.database import IKeyValueRepository
 from src.services.business.auth import IAuthService
 
 
-@dataclass
+@dataclass(frozen=True)
 class LoggerGroup:
     general: Logger
 
-@dataclass
+
+@dataclass(frozen=True)
 class Services:
     auth: IAuthService
 
-@dataclass
+
+@dataclass(frozen=True)
 class App:
     config: Config
     storage: IKeyValueRepository

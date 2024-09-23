@@ -2,6 +2,8 @@ import logging
 import sys
 from pathlib import Path
 
+from aiogram.utils.i18n import I18n
+
 from src.bootstrap.types import App, LoggerGroup, Services
 from src.bot.loader import BotLoader
 from src.bot.types import Bot
@@ -42,15 +44,16 @@ class Bootstrap:
     async def _init_bot(
         config: Config,
         logger_group: LoggerGroup,
-            services: Services,
+        services: Services,
+        i18n: I18n,
     ) -> Bot:
         bot_loader = BotLoader(
             config=config,
             logger_group=logger_group,
             services=services,
+            i18n=i18n,
         )
         return await bot_loader.load()
-
 
     @staticmethod
     async def _configure_logging() -> None:
@@ -94,13 +97,22 @@ class Bootstrap:
             auth=auth_service,
         )
 
+    @staticmethod
+    async def _init_i18n(config: Config) -> I18n:
+        return I18n(
+            path=config.settings.localization.locales_path,
+            default_locale=config.settings.localization.default_locale,
+            domain=config.settings.localization.domain,
+        )
+
     async def initialize_app(self) -> App:
         config = await self._init_config()
         storage = await self._init_storage(config)
         logger_group = await self._init_logger_group(config)
+        i18n = await self._init_i18n(config)
         token_manager = await self._init_token_manager(storage)
         services = await self._init_services(config, token_manager)
-        bot = await self._init_bot(config, logger_group, services)
+        bot = await self._init_bot(config, logger_group, services, i18n)
 
         await self._configure_logging()
 

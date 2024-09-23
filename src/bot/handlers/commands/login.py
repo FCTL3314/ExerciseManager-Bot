@@ -8,7 +8,7 @@ from src.bot.message_templates import (
     INVALID_USERNAME_TEMPLATE,
     INVALID_PASSWORD_TEMPLATE,
 )
-from src.bot.shurtcuts.commands import LOGIN_COMMAND
+from src.bot.services.shortcuts.commands import LOGIN_COMMAND
 from src.bot.states import LoginStates
 from src.config import Settings
 from src.services.business.auth import IAuthService

@@ -8,7 +8,7 @@ from src.bot.message_templates import (
     INVALID_USERNAME_TEMPLATE,
     INVALID_PASSWORD_TEMPLATE,
 )
-from src.bot.shurtcuts.commands import (
+from src.bot.services.shortcuts.commands import (
     REGISTER_COMMAND,
     LOGIN_COMMAND,
     HELP_COMMAND,

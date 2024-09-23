@@ -46,9 +46,17 @@ class ValidationSettings:
 
 
 @dataclass(frozen=True)
+class LocalizationSettings:
+    locales_path: str
+    default_locale: str
+    domain: str
+
+
+@dataclass(frozen=True)
 class Settings:
     logging: LoggingSettings
     validation: ValidationSettings
+    localization: LocalizationSettings
 
 
 @dataclass(frozen=True)
