@@ -5,6 +5,7 @@ from src.bot.types import Bot
 from src.config.types import Config
 from src.database import IKeyValueRepository
 from src.services.business.auth import IAuthService
+from src.services.business.users import IUserService
 
 
 @dataclass(frozen=True)
@@ -15,6 +16,7 @@ class LoggerGroup:
 @dataclass(frozen=True)
 class Services:
     auth: IAuthService
+    user: IUserService
 
 
 @dataclass(frozen=True)

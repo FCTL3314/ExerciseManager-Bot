@@ -6,6 +6,7 @@ from src.bot.services.shortcuts.commands import (
     HELP_COMMAND,
     LOGIN_COMMAND,
     REGISTER_COMMAND,
+    ME_COMMAND,
 )
 
 
@@ -17,6 +18,7 @@ async def _set_bot_commands(bot: Bot) -> None:
             BotCommand(command=str(HELP_COMMAND), description=HELP_COMMAND.description),
             BotCommand(command=str(LOGIN_COMMAND), description=LOGIN_COMMAND.description),
             BotCommand(command=str(REGISTER_COMMAND), description=REGISTER_COMMAND.description),
+            BotCommand(command=str(ME_COMMAND), description=ME_COMMAND.description),
         ]
     )
     # fmt: on

@@ -20,3 +20,9 @@ typecheck:
 # Formating
 format:
 	black .
+
+# Localization
+DEFAULT_LOCALES_DIR=locales
+
+compile_locales:
+	python scripts/compile_locales.py $(or $(LOCALES_DIR), $(DEFAULT_LOCALES_DIR))

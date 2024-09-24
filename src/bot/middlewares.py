@@ -52,5 +52,6 @@ class ServicesMiddleware(BaseMiddleware):
     ) -> Any:
         data["services"] = self.services
         data["auth_service"] = self.services.auth
+        data["user_service"] = self.services.user
         return await handler(event, data)
 

@@ -31,3 +31,7 @@ REGISTER_COMMAND = Command(
     "register",
     "Create an account to unlock all the features and get started.",
 )
+ME_COMMAND = Command(
+    "me",
+    "View your profile information and personalized details.",
+)

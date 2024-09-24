@@ -29,4 +29,7 @@ class APIClient:
                 return await response.json()
             response.raise_for_status()
 
+    @staticmethod
+    async def get_auth_header(access_token: str) -> dict[str, Any]:
+        return {"Authorization": f"Bearer {access_token}"}
 

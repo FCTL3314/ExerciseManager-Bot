@@ -14,8 +14,10 @@ from src.config.types import Config
 from src.database import IKeyValueRepository
 from src.database.redis import RedisRepository
 from src.services.api.auth import AuthAPIClient
+from src.services.api.users import UserAPIClient
 from src.services.business.auth import AuthService
 from src.services.business.token_manager import TokenManager, ITokenManager
+from src.services.business.users import UserService
 
 
 class Bootstrap:
@@ -91,10 +93,14 @@ class Bootstrap:
     @staticmethod
     async def _init_services(config: Config, token_manager: ITokenManager) -> Services:
         auth_api_client = AuthAPIClient(base_url=config.env.api.base_url)
+        user_api_client = UserAPIClient(base_url=config.env.api.base_url)
+
         auth_service = AuthService(auth_api_client, token_manager)
+        user_service = UserService(user_api_client, token_manager)
 
         return Services(
             auth=auth_service,
+            user=user_service,
         )
 
     @staticmethod

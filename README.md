@@ -14,6 +14,6 @@
 # ⚒️ Development
 1. Download dependencies: `pip install -r requirements.txt`
 2. Start docker services: `make up_local_services`
-3. Compile localization files: `python scripts/compile_locales.py locales`
-   * Instead of the locales directory, you can substitute another one if it has changed.
+3. Compile localization files: `make compile_locales`
+   * If the locales directory has changed, you can specify it explicitly: `make compile_locales LOCALES_DIR=new/location/`
 4. Run application: `python main.py`
