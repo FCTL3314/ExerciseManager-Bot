@@ -86,7 +86,7 @@ async def process_password_retype(
     retyped_password = message.text.strip()
 
     try:
-        await auth_service.register(username, original_password, retyped_password)
+        await auth_service.register(username=username, password=original_password, retyped_password=retyped_password)
         await message.answer(
             "Регистрация успешно завершена! 🎉\n\n"
             f"Теперь вы можете использовать свои данные для входа в систему ({html.bold(LOGIN_COMMAND)}. "

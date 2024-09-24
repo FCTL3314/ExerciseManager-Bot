@@ -11,13 +11,13 @@ from src.services.business.token_manager import ITokenManager
 
 class IAuthService(ABC):
     @abstractmethod
-    async def register(self, username: int | str, password: str, retyped_password: str) -> User: ...
+    async def register(self, *, username: int | str, password: str, retyped_password: str) -> User: ...
 
     @abstractmethod
-    async def login(self, user_id: int | str, username: str, password: str) -> bool: ...
+    async def login(self, *, user_id: int | str, username: str, password: str) -> bool: ...
 
     @abstractmethod
-    async def refresh_tokens(self, refresh_token: str) -> bool: ...
+    async def refresh_tokens(self, *, user_id: int | str) -> bool: ...
 
 
 class AuthService(IAuthService):
@@ -27,13 +27,13 @@ class AuthService(IAuthService):
         self._api_client = api_client
         self._token_manager = token_manager
 
-    async def register(self, username: str, password: str, retyped_password: str) -> User:
+    async def register(self, *, username: str, password: str, retyped_password: str) -> User:
         if retyped_password != password:
             raise PasswordsDoNotMatchError
 
         return await self._api_client.register(username, password)
 
-    async def login(self, user_id: int | str, username: str, password: str) -> bool:
+    async def login(self, *, user_id: int | str, username: str, password: str) -> bool:
         try:
             tokens_response = await self._api_client.login(username, password)
         except ClientResponseError as e:
@@ -46,7 +46,7 @@ class AuthService(IAuthService):
         )
         return True
 
-    async def refresh_tokens(self, user_id: int | str) -> bool:
+    async def refresh_tokens(self, *, user_id: int | str) -> bool:
         refresh_token = await self._token_manager.get_refresh_token(user_id)
 
         if refresh_token is None:

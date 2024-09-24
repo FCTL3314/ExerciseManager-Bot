@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 
 from src.models.user import User
-from src.services.api.client import APIClient
+from src.services.api import BaseAPIClient
 
 
-class IUserAPIClient(APIClient, ABC):
+class IUserAPIClient(BaseAPIClient, ABC):
     @abstractmethod
     async def me(self, access_token: str) -> User: ...
 

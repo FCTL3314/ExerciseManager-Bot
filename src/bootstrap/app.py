@@ -96,7 +96,7 @@ class Bootstrap:
         user_api_client = UserAPIClient(base_url=config.env.api.base_url)
 
         auth_service = AuthService(auth_api_client, token_manager)
-        user_service = UserService(user_api_client, token_manager)
+        user_service = UserService(auth_service, user_api_client, token_manager)
 
         return Services(
             auth=auth_service,

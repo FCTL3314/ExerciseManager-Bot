@@ -8,7 +8,7 @@ from aiogram.utils.i18n import SimpleI18nMiddleware, I18n
 
 from src.bootstrap.types import LoggerGroup, Services
 from src.bot.handlers import router as base_router
-from src.bot.middlewares import LoggingMiddleware, ConfigMiddleware, ServicesMiddleware
+from src.bot.middlewares import LoggingMiddleware, ConfigMiddleware, ServicesMiddleware, ClearStateOnErrorMiddleware
 from src.bot.services.lifecycle import on_startup, on_shutdown
 from src.bot.types import Bot
 from src.config import Config
@@ -51,6 +51,7 @@ class BotLoader(IBotLoader):
         dp.message.middleware(ConfigMiddleware(self._config))
         dp.update.outer_middleware(LoggingMiddleware(self._logger_group.general))
         dp.update.outer_middleware(SimpleI18nMiddleware(self._i18n))
+        dp.update.outer_middleware(ClearStateOnErrorMiddleware())
         dp.message.middleware(ServicesMiddleware(self._services))
 
     @staticmethod

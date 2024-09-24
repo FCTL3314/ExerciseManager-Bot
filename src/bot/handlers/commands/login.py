@@ -64,7 +64,9 @@ async def process_password(
         )
         return
 
-    is_success = await auth_service.login(message.from_user.id, username, password)
+    is_success = await auth_service.login(
+        user_id=message.from_user.id, username=username, password=password
+    )
     if is_success:
         await message.answer("🎉 Вы успешно вошли в систему!")
         await state.clear()

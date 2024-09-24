@@ -9,7 +9,7 @@ from src.services.business.users import IUserService
 
 @router.message(Command(ME_COMMAND.name))
 async def command_me_handler(message: Message, user_service: IUserService) -> None:
-    me = await user_service.me(message.from_user.id)
+    me = await user_service.me(user_id=message.from_user.id)
 
     created_at_formatted = me.created_at.strftime("%d %B %Y")
 

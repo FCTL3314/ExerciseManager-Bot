@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 
 from src.models.auth import TokensResponse
 from src.models.user import User
-from src.services.api.client import APIClient
+from src.services.api import BaseAPIClient
 
 
-class IAuthAPIClient(APIClient, ABC):
+class IAuthAPIClient(BaseAPIClient, ABC):
     @abstractmethod
     async def register(self, username: str, password: str) -> User: ...
 
