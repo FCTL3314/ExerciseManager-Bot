@@ -91,11 +91,15 @@ class Bootstrap:
         )
 
     @staticmethod
-    async def _init_services(config: Config, token_manager: ITokenManager) -> Services:
+    async def _init_services(
+        config: Config, token_manager: ITokenManager, storage: IKeyValueRepository
+    ) -> Services:
         auth_api_client = AuthAPIClient(base_url=config.env.api.base_url)
         user_api_client = UserAPIClient(base_url=config.env.api.base_url)
 
-        auth_service = AuthService(auth_api_client, token_manager)
+        auth_service = AuthService(
+            auth_api_client, user_api_client, token_manager, storage
+        )
         user_service = UserService(auth_service, user_api_client, token_manager)
 
         return Services(
@@ -117,7 +121,7 @@ class Bootstrap:
         logger_group = await self._init_logger_group(config)
         i18n = await self._init_i18n(config)
         token_manager = await self._init_token_manager(storage)
-        services = await self._init_services(config, token_manager)
+        services = await self._init_services(config, token_manager, storage)
         bot = await self._init_bot(config, logger_group, services, i18n)
 
         await self._configure_logging()
