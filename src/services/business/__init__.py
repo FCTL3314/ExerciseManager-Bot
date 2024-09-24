@@ -6,7 +6,9 @@ from typing import Any, Callable, Awaitable
 from aiohttp import ClientResponseError
 
 from src.services.business.auth import IAuthService
-from src.services.business.exceptions import UserIdParamRequiredError
+from src.services.business.exceptions import (
+    InheritanceRequiredForDecoratorError,
+)
 from src.services.business.token_manager import ITokenManager
 
 
@@ -18,8 +20,14 @@ class BaseService(ABC):
     def refresh_tokens_on_unauthorized(method: Callable[..., Awaitable[Any]]):
         @wraps(method)
         async def wrapper(self, *args, **kwargs):
+            if not isinstance(self, BaseService):
+                raise InheritanceRequiredForDecoratorError(
+                    f"This decorator should only be used on methods "
+                    f"of classes inheriting from {BaseService.__name__}."
+                )
+
             if not (user_id := kwargs.get("user_id")):
-                raise UserIdParamRequiredError
+                raise TypeError("Missing required 'user_id' argument.")
 
             try:
                 return await method(self, *args, **kwargs)
@@ -27,7 +35,9 @@ class BaseService(ABC):
                 if e.status != HTTPStatus.UNAUTHORIZED:
                     raise e
 
-                is_tokens_refreshed = await self._auth_service.refresh_tokens(user_id=user_id)
+                is_tokens_refreshed = await self._auth_service.refresh_tokens(
+                    user_id=user_id
+                )
 
                 if not is_tokens_refreshed:
                     raise e
