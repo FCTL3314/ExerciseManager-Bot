@@ -7,3 +7,4 @@ from src.bot.handlers.commands.register import *
 from src.bot.handlers.commands.login import *
 from src.bot.handlers.commands.me import *
 from src.bot.handlers.commands.add_workout import *
+from src.bot.handlers.commands.add_exercise import *

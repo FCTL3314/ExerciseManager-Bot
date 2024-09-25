@@ -19,7 +19,7 @@ class BaseAPIClient:
         data: dict[str, Any] | None = None,
         params: dict[str, Any] | None = None,
         **kwargs,
-    ) -> dict[str, Any]:
+    ) -> Any:
         url = urljoin(self._base_url, endpoint)
         async with self._session.request(
             method, url, json=data, params=params, **kwargs

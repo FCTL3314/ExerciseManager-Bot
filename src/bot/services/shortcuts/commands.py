@@ -39,3 +39,7 @@ ADD_WORKOUT_COMMAND = Command(
     "add_workout",
     "Create a new workout plan by adding exercises and setting up your routine.",
 )
+ADD_EXERCISE_COMMAND = Command(
+    "add_exercise",
+    "Add exercise for your workout.",
+)

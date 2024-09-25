@@ -7,7 +7,7 @@ from src.bot.services.shortcuts.commands import (
     LOGIN_COMMAND,
     REGISTER_COMMAND,
     ME_COMMAND,
-    ADD_WORKOUT_COMMAND,
+    ADD_WORKOUT_COMMAND, ADD_EXERCISE_COMMAND,
 )
 
 
@@ -21,6 +21,7 @@ async def _set_bot_commands(bot: Bot) -> None:
             BotCommand(command=str(REGISTER_COMMAND), description=REGISTER_COMMAND.description),
             BotCommand(command=str(ME_COMMAND), description=ME_COMMAND.description),
             BotCommand(command=str(ADD_WORKOUT_COMMAND), description=ADD_WORKOUT_COMMAND.description),
+            BotCommand(command=str(ADD_EXERCISE_COMMAND), description=ADD_EXERCISE_COMMAND.description),
         ]
     )
     # fmt: on

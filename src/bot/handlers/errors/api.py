@@ -41,7 +41,7 @@ async def api_error_handler(event: ErrorEvent, message: Message, logger: Logger)
             await message.answer(
                 f"⚠️ Произошла ошибка при обращении к внешнему ресурсу. Статус: {status}. Попробуйте позже."
             )
-            logger.warning(
-                f"Unhandled backend request error:",
-                exc_info=True,
-            )
+    logger.warning(
+        f"Backend request error:",
+        exc_info=True,
+    )

@@ -15,3 +15,10 @@ class LoginStates(StatesGroup):
 class WorkoutAddingStates(StatesGroup):
     name = State()
     description = State()
+
+class ExerciseAddingStates(StatesGroup):
+    workout = State()
+    name = State()
+    description = State()
+    duration = State()
+
