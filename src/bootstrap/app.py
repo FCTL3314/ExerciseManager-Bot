@@ -15,9 +15,11 @@ from src.database import IKeyValueRepository
 from src.database.redis import RedisRepository
 from src.services.api.auth import AuthAPIClient
 from src.services.api.users import UserAPIClient
+from src.services.api.workouts import WorkoutAPIClient
 from src.services.business.auth import AuthService
 from src.services.business.token_manager import TokenManager, ITokenManager
 from src.services.business.users import UserService
+from src.services.business.workouts import WorkoutService
 
 
 class Bootstrap:
@@ -96,15 +98,18 @@ class Bootstrap:
     ) -> Services:
         auth_api_client = AuthAPIClient(base_url=config.env.api.base_url)
         user_api_client = UserAPIClient(base_url=config.env.api.base_url)
+        workout_api_client = WorkoutAPIClient(base_url=config.env.api.base_url)
 
         auth_service = AuthService(
             auth_api_client, user_api_client, token_manager, storage
         )
         user_service = UserService(auth_service, user_api_client, token_manager)
+        workout_service = WorkoutService(auth_service, workout_api_client, token_manager)
 
         return Services(
             auth=auth_service,
             user=user_service,
+            workout=workout_service,
         )
 
     @staticmethod

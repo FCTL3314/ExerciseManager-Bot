@@ -35,3 +35,7 @@ ME_COMMAND = Command(
     "me",
     "View your profile information and personalized details.",
 )
+ADD_WORKOUT_COMMAND = Command(
+    "add_workout",
+    "Create a new workout plan by adding exercises and setting up your routine.",
+)

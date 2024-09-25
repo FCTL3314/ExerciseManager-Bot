@@ -11,3 +11,7 @@ class LoginStates(StatesGroup):
     username = State()
     password = State()
 
+
+class WorkoutAddingStates(StatesGroup):
+    name = State()
+    description = State()

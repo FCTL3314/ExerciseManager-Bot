@@ -11,7 +11,7 @@ class Workout(BaseModel):
     name: str
     description: str
     user: User
-    WorkoutExercises: list["WorkoutExercise"]
+    workout_exercises: list["WorkoutExercise"]
     created_at: datetime
     updated_at: datetime
 

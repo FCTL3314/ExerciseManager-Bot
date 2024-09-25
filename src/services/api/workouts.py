@@ -17,6 +17,7 @@ class WorkoutAPIClient(IWorkoutAPIClient):
         data = await self.request(
             "POST",
             "workouts/",
+            data={"name": name, "description": description},
             headers=await self.get_auth_header(access_token),
         )
         return Workout(**data)

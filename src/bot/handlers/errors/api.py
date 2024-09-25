@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from logging import Logger
 
 from aiogram import html, F
 from aiogram.filters import ExceptionTypeFilter
@@ -9,7 +10,7 @@ from src.bot.handlers.errors import router
 
 
 @router.error(ExceptionTypeFilter(ClientResponseError), F.update.message.as_("message"))
-async def api_error_handler(event: ErrorEvent, message: Message):
+async def api_error_handler(event: ErrorEvent, message: Message, logger: Logger):
     status = HTTPStatus(event.exception.status)  # noqa
     match status:
         case HTTPStatus.UNAUTHORIZED:
@@ -39,4 +40,8 @@ async def api_error_handler(event: ErrorEvent, message: Message):
         case _:
             await message.answer(
                 f"⚠️ Произошла ошибка при обращении к внешнему ресурсу. Статус: {status}. Попробуйте позже."
+            )
+            logger.warning(
+                f"Unhandled backend request error:",
+                exc_info=True,
             )

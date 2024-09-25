@@ -41,8 +41,15 @@ class UserValidationConfig:
 
 
 @dataclass(frozen=True)
+class WorkoutValidationConfig:
+    name_max_length: int
+    name_min_length: int
+
+
+@dataclass(frozen=True)
 class ValidationSettings:
     user: UserValidationConfig
+    workout: WorkoutValidationConfig
 
 
 @dataclass(frozen=True)
