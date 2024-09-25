@@ -19,6 +19,10 @@ START_COMMAND = Command(
     "start",
     "Learn more about what I can do for you.",
 )
+CANCEL_COMMAND = Command(
+    "cancel",
+    "Cancel current action.",
+)
 HELP_COMMAND = Command(
     "help",
     "Need assistance? I'll show you how to use my commands.",

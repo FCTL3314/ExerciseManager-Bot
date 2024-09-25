@@ -2,23 +2,23 @@ from aiogram.fsm.state import StatesGroup, State
 
 
 class RegistrationStates(StatesGroup):
-    username = State()
-    password = State()
-    password_retype = State()
+    waiting_for_username_input = State()
+    waiting_for_password_input = State()
+    waiting_for_password_retype_input = State()
 
 
 class LoginStates(StatesGroup):
-    username = State()
-    password = State()
+    waiting_for_username_input = State()
+    waiting_for_password_input = State()
 
 
 class WorkoutAddingStates(StatesGroup):
-    name = State()
-    description = State()
+    waiting_for_name_input = State()
+    waiting_for_description_input = State()
 
 class ExerciseAddingStates(StatesGroup):
-    workout = State()
-    name = State()
-    description = State()
-    duration = State()
+    waiting_for_workout_selection = State()
+    waiting_for_name_input = State()
+    waiting_for_description_input = State()
+    waiting_for_duration_input = State()
 
