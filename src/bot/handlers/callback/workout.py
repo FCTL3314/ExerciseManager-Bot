@@ -13,6 +13,5 @@ async def process_add_exercise_workout_selection(
     state: FSMContext,
 ) -> None:
     await state.update_data(workout_id=callback_data.workout_id)
-    await callback_query.message.edit_text("Введите название упражнения:")
     await state.set_state(ExerciseAddingStates.waiting_for_name_input)
-    await callback_query.answer()
+    await callback_query.message.edit_text("Введите название упражнения:")

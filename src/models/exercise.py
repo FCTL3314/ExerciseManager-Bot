@@ -10,5 +10,14 @@ class Exercise(BaseModel):
     name: str
     description: str
     duration: timedelta
-    image: str
+    image: str | None
     user: User
+
+
+class NestedExercise(BaseModel):
+    id: int
+    name: str
+    description: str
+    duration: timedelta
+    image: str | None
+

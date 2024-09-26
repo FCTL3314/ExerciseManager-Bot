@@ -19,7 +19,7 @@ async def command_start_handler(message: Message) -> None:
     )
 
 
-@router.message(Command(CANCEL_COMMAND.name)) # TODO: Добавить CANCEL_COMMAND.as_filter()
+@router.message(CANCEL_COMMAND.as_filter())
 async def command_cancel_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from pydantic import BaseModel
 
-from src.models.exercise import Exercise
+from src.models.exercise import NestedExercise
 from src.models.user import User
 
 
@@ -11,7 +11,7 @@ class Workout(BaseModel):
     name: str
     description: str
     user: User
-    workout_exercises: list["WorkoutExercise"]
+    workout_exercises: list["NestedWorkoutExercise"]
     created_at: datetime
     updated_at: datetime
 
@@ -19,6 +19,13 @@ class Workout(BaseModel):
 class WorkoutExercise(BaseModel):
     id: int
     workout: Workout
-    exercise: Exercise
+    exercise: NestedExercise
+    break_time: timedelta
+    created_at: datetime
+
+
+class NestedWorkoutExercise(BaseModel):
+    id: int
+    exercise: NestedExercise
     break_time: timedelta
     created_at: datetime

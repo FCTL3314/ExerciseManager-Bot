@@ -1,11 +1,18 @@
 from aiogram import html
-from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from src.bot.handlers.commands import router
-from src.bot.message_templates import INVALID_USERNAME_TEMPLATE, INVALID_PASSWORD_TEMPLATE
-from src.bot.services.shortcuts.commands import REGISTER_COMMAND, LOGIN_COMMAND, HELP_COMMAND, ME_COMMAND
+from src.bot.message_templates import (
+    INVALID_USERNAME_TEMPLATE,
+    INVALID_PASSWORD_TEMPLATE,
+)
+from src.bot.services.shortcuts.commands import (
+    REGISTER_COMMAND,
+    LOGIN_COMMAND,
+    HELP_COMMAND,
+    ME_COMMAND,
+)
 from src.bot.states import RegistrationStates, LoginStates
 from src.config import Settings
 from src.services.business import IAuthService
@@ -14,7 +21,7 @@ from src.services.business.users import IUserService
 from src.services.validators.user import is_username_valid, is_password_valid
 
 
-@router.message(Command(REGISTER_COMMAND.name))
+@router.message(REGISTER_COMMAND.as_filter())
 async def command_register_handler(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
@@ -80,7 +87,11 @@ async def process_registration_password_retype(
     retyped_password = message.text.strip()
 
     try:
-        await auth_service.register(username=username, password=original_password, retyped_password=retyped_password)
+        await auth_service.register(
+            username=username,
+            password=original_password,
+            retyped_password=retyped_password,
+        )
         await message.answer(
             "Регистрация успешно завершена! 🎉\n\n"
             f"Теперь вы можете использовать свои данные для входа в систему ({html.bold(LOGIN_COMMAND)}. "
@@ -94,7 +105,7 @@ async def process_registration_password_retype(
         await state.set_state(RegistrationStates.waiting_for_password_input)
 
 
-@router.message(Command(LOGIN_COMMAND.name))
+@router.message(LOGIN_COMMAND.as_filter())
 async def command_login_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(LoginStates.waiting_for_username_input)
     await message.answer(
@@ -156,7 +167,7 @@ async def process_login_password(
         await state.clear()
 
 
-@router.message(Command(ME_COMMAND.name))
+@router.message(ME_COMMAND.as_filter())
 async def command_me_handler(message: Message, user_service: IUserService) -> None:
     me = await user_service.me(user_id=message.from_user.id)
 

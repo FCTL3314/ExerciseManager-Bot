@@ -16,7 +16,7 @@ class IAuthAPIClient(BaseAPIClient, ABC):
     async def refresh_tokens(self, refresh_token: str) -> TokensResponse: ...
 
 
-class AuthAPIClient(IAuthAPIClient):
+class DefaultAuthAPIClient(IAuthAPIClient):
 
     async def register(self, username: str, password: str) -> User:
         data = await self.request(

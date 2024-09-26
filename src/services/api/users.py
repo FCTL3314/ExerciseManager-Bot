@@ -9,7 +9,7 @@ class IUserAPIClient(BaseAPIClient, ABC):
     async def me(self, access_token: str) -> User: ...
 
 
-class UserAPIClient(IUserAPIClient):
+class DefaultUserAPIClient(IUserAPIClient):
 
     async def me(self, access_token: str) -> User:
         data = await self.request(

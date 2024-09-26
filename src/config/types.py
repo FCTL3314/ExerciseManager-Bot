@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import timedelta
 
 
 @dataclass(frozen=True)
@@ -32,7 +33,7 @@ class LoggingSettings:
 
 
 @dataclass(frozen=True)
-class UserValidationConfig:
+class UserValidationSettings:
     username_max_length: int
     username_min_length: int
 
@@ -41,15 +42,22 @@ class UserValidationConfig:
 
 
 @dataclass(frozen=True)
-class WorkoutValidationConfig:
+class WorkoutValidationSettings:
     name_max_length: int
     name_min_length: int
+
+@dataclass(frozen=True)
+class ExerciseValidationSettings:
+    name_max_length: int
+    name_min_length: int
+    max_exercise_break_time: timedelta
 
 
 @dataclass(frozen=True)
 class ValidationSettings:
-    user: UserValidationConfig
-    workout: WorkoutValidationConfig
+    user: UserValidationSettings
+    workout: WorkoutValidationSettings
+    exercise: ExerciseValidationSettings
 
 
 @dataclass(frozen=True)

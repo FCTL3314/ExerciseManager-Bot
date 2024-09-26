@@ -5,6 +5,7 @@ from src.bot.types import Bot
 from src.config.types import Config
 from src.database import IKeyValueRepository
 from src.services.business.auth import IAuthService
+from src.services.business.exercises import IExerciseService
 from src.services.business.users import IUserService
 from src.services.business.workouts import IWorkoutService
 
@@ -19,6 +20,7 @@ class Services:
     auth: IAuthService
     user: IUserService
     workout: IWorkoutService
+    exercise: IExerciseService
 
 
 @dataclass(frozen=True)

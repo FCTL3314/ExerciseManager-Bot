@@ -13,13 +13,15 @@ from src.config.settings import SettingsLoader
 from src.config.types import Config
 from src.database import IKeyValueRepository
 from src.database.redis import RedisRepository
-from src.services.api.auth import AuthAPIClient
-from src.services.api.users import UserAPIClient
-from src.services.api.workouts import WorkoutAPIClient
-from src.services.business.auth import AuthService
+from src.services.api.auth import DefaultAuthAPIClient
+from src.services.api.exercises import DefaultExerciseAPIClient
+from src.services.api.users import DefaultUserAPIClient
+from src.services.api.workouts import DefaultWorkoutAPIClient
+from src.services.business.auth import DefaultAuthService
+from src.services.business.exercises import DefaultExerciseService
 from src.services.business.token_manager import TokenManager, ITokenManager
-from src.services.business.users import UserService
-from src.services.business.workouts import WorkoutService
+from src.services.business.users import DefaultUserService
+from src.services.business.workouts import DefaultWorkoutService
 
 
 class Bootstrap:
@@ -96,20 +98,33 @@ class Bootstrap:
     async def _init_services(
         config: Config, token_manager: ITokenManager, storage: IKeyValueRepository
     ) -> Services:
-        auth_api_client = AuthAPIClient(base_url=config.env.api.base_url)
-        user_api_client = UserAPIClient(base_url=config.env.api.base_url)
-        workout_api_client = WorkoutAPIClient(base_url=config.env.api.base_url)
+        auth_api_client = DefaultAuthAPIClient(base_url=config.env.api.base_url)
+        user_api_client = DefaultUserAPIClient(base_url=config.env.api.base_url)
+        workout_api_client = DefaultWorkoutAPIClient(base_url=config.env.api.base_url)
+        exercise_api_client = DefaultExerciseAPIClient(base_url=config.env.api.base_url)
 
-        auth_service = AuthService(
+        auth_service = DefaultAuthService(
             auth_api_client, user_api_client, token_manager, storage
         )
-        user_service = UserService(auth_service, user_api_client, token_manager)
-        workout_service = WorkoutService(auth_service, workout_api_client, token_manager)
+        user_service = DefaultUserService(auth_service, user_api_client, token_manager)
+        workout_service = DefaultWorkoutService(
+            auth_service,
+            workout_api_client,
+            exercise_api_client,
+            token_manager,
+            config.settings.validation.exercise,
+        )
+        exercise_service = DefaultExerciseService(
+            auth_service,
+            exercise_api_client,
+            token_manager,
+        )
 
         return Services(
             auth=auth_service,
             user=user_service,
             workout=workout_service,
+            exercise=exercise_service,
         )
 
     @staticmethod

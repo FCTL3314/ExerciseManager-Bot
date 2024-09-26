@@ -31,7 +31,7 @@ class IAuthService(ABC):
     ) -> str | None: ...
 
 
-class AuthService(IAuthService):
+class DefaultAuthService(IAuthService):
     USER_ID_BY_TG_ID_KEY_TEMPLATE = "tg_user_id:__{tg_user_id}__user_id"
 
     def __init__(

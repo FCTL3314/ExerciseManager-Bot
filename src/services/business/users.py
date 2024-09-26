@@ -11,7 +11,7 @@ class IUserService(BaseService, ABC):
     async def me(self, *, user_id: int | str) -> User: ...
 
 
-class UserService(IUserService):
+class DefaultUserService(IUserService):
     def __init__(
         self, auth_service: IAuthService, api_client: IUserAPIClient, token_manager: ITokenManager
     ) -> None:

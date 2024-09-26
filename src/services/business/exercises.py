@@ -5,6 +5,7 @@ from src.models.exercise import Exercise
 from src.services.api.exercises import IExerciseAPIClient
 from src.services.business import BaseService, IAuthService
 from src.services.business.token_manager import ITokenManager
+from src.services.duration import to_nanoseconds
 
 
 class IExerciseService(BaseService, ABC):
@@ -14,7 +15,7 @@ class IExerciseService(BaseService, ABC):
     ) -> Exercise: ...
 
 
-class ExerciseService(IExerciseService):
+class DefaultExerciseService(IExerciseService):
     def __init__(
         self,
         auth_service: IAuthService,
@@ -30,4 +31,5 @@ class ExerciseService(IExerciseService):
         self, *, user_id: int | str, name: str, description: str, duration: timedelta
     ) -> Exercise:
         access_token = await self._token_manager.get_access_token(user_id)
-        return await self._api_client.create(access_token, name, description, duration)
+        _duration = to_nanoseconds(duration)
+        return await self._api_client.create(access_token, name, description, _duration)

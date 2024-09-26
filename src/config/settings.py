@@ -4,10 +4,12 @@ from src.config import ISettingsLoader, Settings
 from src.config.types import (
     LoggingSettings,
     ValidationSettings,
-    UserValidationConfig,
+    UserValidationSettings,
     LocalizationSettings,
-    WorkoutValidationConfig,
+    WorkoutValidationSettings,
+    ExerciseValidationSettings,
 )
+from src.services.duration import from_nanoseconds
 
 
 class SettingsLoader(ISettingsLoader):
@@ -21,20 +23,28 @@ class SettingsLoader(ISettingsLoader):
         )
 
     def _load_validation(self) -> ValidationSettings:
-        user_validation_config = UserValidationConfig(
+        user_validation_config = UserValidationSettings(
             username_max_length=self._config("USER_USERNAME_MAX_LENGTH", cast=int),
             username_min_length=self._config("USER_USERNAME_MIN_LENGTH", cast=int),
             password_max_length=self._config("USER_PASSWORD_MAX_LENGTH", cast=int),
             password_min_length=self._config("USER_PASSWORD_MIN_LENGTH", cast=int),
         )
-        workout_validation_config = WorkoutValidationConfig(
+        workout_validation_config = WorkoutValidationSettings(
             name_max_length=self._config("WORKOUT_NAME_MAX_LENGTH", cast=int),
             name_min_length=self._config("WORKOUT_NAME_MIN_LENGTH", cast=int),
+        )
+        exercise_validation_config = ExerciseValidationSettings(
+            name_max_length=self._config("EXERCISE_NAME_MAX_LENGTH", cast=int),
+            name_min_length=self._config("EXERCISE_NAME_MIN_LENGTH", cast=int),
+            max_exercise_break_time=from_nanoseconds(
+                self._config("MAX_EXERCISE_BREAK_TIME", cast=int)
+            ),
         )
 
         return ValidationSettings(
             user=user_validation_config,
             workout=workout_validation_config,
+            exercise=exercise_validation_config,
         )
 
     def _load_localization(self) -> LocalizationSettings:

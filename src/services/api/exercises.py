@@ -1,22 +1,20 @@
 from abc import ABC, abstractmethod
-from datetime import timedelta
 
 from src.models.exercise import Exercise
 from src.services.api import BaseAPIClient
-from src.services.duration import to_nanoseconds
 
 
 class IExerciseAPIClient(BaseAPIClient, ABC):
     @abstractmethod
     async def create(
-        self, access_token: str, name: str, description: str, duration: timedelta
+        self, access_token: str, name: str, description: str, duration: int
     ) -> Exercise: ...
 
 
-class WorkoutAPIClient(IExerciseAPIClient):
+class DefaultExerciseAPIClient(IExerciseAPIClient):
 
     async def create(
-        self, access_token: str, name: str, description: str, duration: timedelta
+        self, access_token: str, name: str, description: str, duration: int
     ) -> Exercise:
         data = await self.request(
             "POST",
@@ -24,7 +22,7 @@ class WorkoutAPIClient(IExerciseAPIClient):
             data={
                 "name": name,
                 "description": description,
-                "duration": to_nanoseconds(duration),
+                "duration": duration,
             },
             headers=await self.get_auth_header(access_token),
         )

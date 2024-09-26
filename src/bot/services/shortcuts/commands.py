@@ -1,3 +1,7 @@
+from aiogram.filters import Command as ACommand
+from aiogram.types import BotCommand
+
+
 class Command:
     def __init__(self, name: str, description: str) -> None:
         self._name = name
@@ -10,6 +14,12 @@ class Command:
     @property
     def description(self) -> str:
         return self._description
+
+    def as_filter(self) -> ACommand:
+        return ACommand(self._name)
+
+    def as_bot_command(self) -> BotCommand:
+        return BotCommand(command=str(self), description=self._description)
 
     def __str__(self) -> str:
         return f"/{self.name}"

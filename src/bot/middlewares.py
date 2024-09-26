@@ -56,6 +56,7 @@ class ServicesMiddleware(BaseMiddleware):
         data["auth_service"] = self.services.auth
         data["user_service"] = self.services.user
         data["workout_service"] = self.services.workout
+        data["exercise_service"] = self.services.exercise
         return await handler(event, data)
 
 
