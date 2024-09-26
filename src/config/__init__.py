@@ -6,13 +6,13 @@ from src.config.types import Config, EnvironmentConfig, Settings
 class IEnvironmentConfigLoader(ABC):
 
     @abstractmethod
-    def load(self) -> EnvironmentConfig: ...
+    async def load(self) -> EnvironmentConfig: ...
 
 
 class ISettingsLoader(ABC):
 
     @abstractmethod
-    def load(self) -> Settings: ...
+    async def load(self) -> Settings: ...
 
 
 class ConfigLoader:
@@ -25,9 +25,9 @@ class ConfigLoader:
         self._env_loader = env_loader
         self._settings_loader = settings_loader
 
-    def load(self) -> Config:
-        env_config = self._env_loader.load()
-        settings = self._settings_loader.load()
+    async def load(self) -> Config:
+        env_config = await self._env_loader.load()
+        settings = await self._settings_loader.load()
         return Config(
             env=env_config,
             settings=settings,

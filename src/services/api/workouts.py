@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from src.models.workout import Workout
+from src.models.workout import Workout, WorkoutPaginatedResponse
 from src.services.api import BaseAPIClient
 
 
@@ -9,7 +9,12 @@ class IWorkoutAPIClient(BaseAPIClient, ABC):
     async def retrieve(self, workout_id: int | str) -> Workout: ...
 
     @abstractmethod
-    async def list(self, user_id: int | str | None) -> list[Workout]: ...
+    async def list(
+        self,
+        user_id: int | str | None,
+        limit: int,
+        offset: int,
+    ) -> WorkoutPaginatedResponse: ...
 
     @abstractmethod
     async def create(
@@ -32,8 +37,13 @@ class DefaultWorkoutAPIClient(IWorkoutAPIClient):
         workout = await self.request("GET", f"workouts/{workout_id}/")
         return Workout(**workout)
 
-    async def list(self, user_id: int | str | None) -> list[Workout]:
-        params = {}
+    async def list(
+        self,
+        user_id: int | str | None,
+        limit: int = 64,
+        offset: int = 0,
+    ) -> WorkoutPaginatedResponse:
+        params = {"limit": limit, "offset": offset}
         if user_id is not None:
             params["user_id"] = user_id
 
@@ -42,7 +52,12 @@ class DefaultWorkoutAPIClient(IWorkoutAPIClient):
             "workouts/",
             params=params,
         )
-        return [Workout(**workout) for workout in data["results"]]
+        return WorkoutPaginatedResponse(
+            count=data["count"],
+            limit=data["limit"],
+            offset=data["offset"],
+            results=[Workout(**workout) for workout in data["results"]],
+        )
 
     async def create(self, access_token: str, name: str, description: str) -> Workout:
         workout = await self.request(

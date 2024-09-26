@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 from pydantic import BaseModel
 
+from src.models import PaginatedResponse
 from src.models.exercise import ExerciseRead
 from src.models.user import User
 
@@ -29,3 +30,6 @@ class WorkoutExerciseRead(BaseModel):
     exercise: ExerciseRead
     break_time: timedelta
     created_at: datetime
+
+
+class WorkoutPaginatedResponse(PaginatedResponse[Workout]): ...

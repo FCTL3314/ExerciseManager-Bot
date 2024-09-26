@@ -39,7 +39,7 @@ async def process_registration_username(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
     username = message.text.strip()
-    if not is_username_valid(username, settings.validation.user):
+    if not await is_username_valid(username, settings.validation.user):
         await message.answer(
             INVALID_USERNAME_TEMPLATE.format(
                 min_length=settings.validation.user.username_min_length,
@@ -62,7 +62,7 @@ async def process_registration_password(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
     password = message.text.strip()
-    if not is_password_valid(password, settings.validation.user):
+    if not await is_password_valid(password, settings.validation.user):
         await message.answer(
             INVALID_PASSWORD_TEMPLATE.format(
                 min_length=settings.validation.user.username_min_length,
@@ -119,7 +119,7 @@ async def process_login_username(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
     username = message.text.strip()
-    if not is_username_valid(username, settings.validation.user):
+    if not await is_username_valid(username, settings.validation.user):
         await message.answer(
             INVALID_USERNAME_TEMPLATE.format(
                 min_length=settings.validation.user.username_min_length,
@@ -145,7 +145,7 @@ async def process_login_password(
     username = data["username"]
     password = message.text.strip()
 
-    if not is_password_valid(password, settings.validation.user):
+    if not await is_password_valid(password, settings.validation.user):
         await message.answer(
             INVALID_PASSWORD_TEMPLATE.format(
                 min_length=settings.validation.user.username_min_length,

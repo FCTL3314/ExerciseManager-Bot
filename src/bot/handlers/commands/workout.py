@@ -15,6 +15,7 @@ from src.bot.services.shortcuts.commands import (
 from src.bot.states import WorkoutAddingStates, ExerciseAddingStates
 from src.config import Settings
 from src.services.business.workouts import IWorkoutService
+from src.services.exceptions import NoWorkoutsError
 from src.services.validators.duration import is_valid_duration_string
 from src.services.validators.exercise import (
     is_name_valid as is_exercise_name_valid,
@@ -41,7 +42,7 @@ async def process_add_workout_name(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
     name = message.text.strip()
-    if not is_workout_name_valid(name, settings.validation.workout):
+    if not await is_workout_name_valid(name, settings.validation.workout):
         await message.answer(
             INVALID_WORKOUT_NAME_TEMPLATE.format(
                 min_length=settings.validation.workout.name_min_length,
@@ -82,15 +83,21 @@ async def command_add_exercise_handler(
     message: Message,
     state: FSMContext,
     workout_service: IWorkoutService,
+    settings: Settings,
 ) -> None:
-    workouts = await workout_service.list(user_id=message.from_user.id)
-    if not workouts:
+    try:
+        keyboard = await get_workouts_keyboard(
+            user_id=message.from_user.id,
+            workout_service=workout_service,
+            limit=settings.pagination.workout.workouts_keyboard_paginate_by,
+        )
+    except NoWorkoutsError:
         await message.answer(
             f"❌ У вас пока нет созданных тренировок. Пожалуйста, создайте тренировку перед добавлением упражнений, используя команду {html.bold(ADD_WORKOUT_COMMAND)}."
         )
         return
 
-    keyboard = await get_workouts_keyboard(workouts)
+    await state.update_data(page=1)
     await state.set_state(ExerciseAddingStates.waiting_for_workout_selection)
     await message.answer(
         "📋 Выберите тренировку, к которой хотите добавить упражнение:",
@@ -138,13 +145,13 @@ async def process_add_exercise_duration(
 ) -> None:
     duration = message.text.strip()
 
-    if not is_valid_duration_string(duration):
+    if not await is_valid_duration_string(duration):
         await message.answer(
             f"❌ Неверный формат продолжительности упражнения. Пожалуйста, введите продолжительность снова, используя формат {html.bold('1m')} или {html.bold('30s')}:"
         )
         return
 
-    if not is_exercise_duration_valid(duration, settings.validation.exercise):
+    if not await is_exercise_duration_valid(duration, settings.validation.exercise):
         await message.answer(
             f"❌ Продолжительность упражнения слишком длинная. Пожалуйста, введите меньшую длительность:"
         )
@@ -174,13 +181,13 @@ async def process_add_exercise_break_time(
     duration = data["duration"]
     break_time = message.text.strip()
 
-    if not is_valid_duration_string(break_time):
+    if not await is_valid_duration_string(break_time):
         await message.answer(
             f"❌ Неверный формат перерыва после упражнения. Пожалуйста, введите перерыв заново, используя формат {html.bold('1m')} или {html.bold('30s')}:"
         )
         return
 
-    if not is_exercise_break_time_valid(break_time, settings.validation.exercise):
+    if not await is_exercise_break_time_valid(break_time, settings.validation.exercise):
         await message.answer(
             f"❌ Время перерыва слишком длинное. Пожалуйста, введите меньшее время, используя формат {html.bold('1m')} или {html.bold('30s')}:"
         )

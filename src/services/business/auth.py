@@ -26,9 +26,7 @@ class IAuthService(ABC):
     async def refresh_tokens(self, *, user_id: int | str) -> bool: ...
 
     @abstractmethod
-    async def get_user_id_by_tg_user_id(
-        self, *, user_id: int | str
-    ) -> str | None: ...
+    async def get_user_id_by_tg_user_id(self, *, user_id: int | str) -> str | None: ...
 
 
 class DefaultAuthService(IAuthService):

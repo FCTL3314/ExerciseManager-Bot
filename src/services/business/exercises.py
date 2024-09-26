@@ -31,5 +31,5 @@ class DefaultExerciseService(IExerciseService):
         self, *, user_id: int | str, name: str, description: str, duration: timedelta
     ) -> Exercise:
         access_token = await self._token_manager.get_access_token(user_id)
-        _duration = to_nanoseconds(duration)
+        _duration = await to_nanoseconds(duration)
         return await self._api_client.create(access_token, name, description, _duration)

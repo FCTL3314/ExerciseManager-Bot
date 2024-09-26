@@ -33,5 +33,4 @@ async def on_startup(bot: Bot) -> None:
     await _set_bot_commands(bot)  # noqa
 
 
-async def on_shutdown():
-    ...
+async def on_shutdown(): ...

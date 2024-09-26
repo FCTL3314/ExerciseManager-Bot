@@ -6,9 +6,11 @@ from datetime import timedelta
 class BotConfig:
     token: str
 
+
 @dataclass(frozen=True)
 class APIConfig:
     base_url: str
+
 
 @dataclass(frozen=True)
 class RedisConfig:
@@ -46,6 +48,7 @@ class WorkoutValidationSettings:
     name_max_length: int
     name_min_length: int
 
+
 @dataclass(frozen=True)
 class ExerciseValidationSettings:
     name_max_length: int
@@ -69,9 +72,20 @@ class LocalizationSettings:
 
 
 @dataclass(frozen=True)
+class WorkoutPaginationSettings:
+    workouts_keyboard_paginate_by: int
+
+
+@dataclass(frozen=True)
+class PaginationSettings:
+    workout: WorkoutPaginationSettings
+
+
+@dataclass(frozen=True)
 class Settings:
     logging: LoggingSettings
     validation: ValidationSettings
+    pagination: PaginationSettings
     localization: LocalizationSettings
 
 

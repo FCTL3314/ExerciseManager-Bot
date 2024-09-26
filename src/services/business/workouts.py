@@ -1,13 +1,16 @@
 from abc import ABC, abstractmethod
 
 from src.config.types import ExerciseValidationSettings
-from src.models.workout import Workout
+from src.models.workout import Workout, WorkoutPaginatedResponse
 from src.services.api.exercises import IExerciseAPIClient
 from src.services.api.workouts import IWorkoutAPIClient
 from src.services.business import BaseService, IAuthService
 from src.services.business.token_manager import ITokenManager
 from src.services.duration import to_nanoseconds, parse_duration_string
-from src.services.exceptions import ExerciseBreakTooLongError, ExerciseDurationTooLongError
+from src.services.exceptions import (
+    ExerciseBreakTooLongError,
+    ExerciseDurationTooLongError,
+)
 
 
 class IWorkoutService(BaseService, ABC):
@@ -15,7 +18,13 @@ class IWorkoutService(BaseService, ABC):
     async def retrieve(self, *, workout_id: str | int) -> Workout: ...
 
     @abstractmethod
-    async def list(self, *, user_id: int | str | None) -> list[Workout]: ...
+    async def list(
+        self,
+        *,
+        user_id: int | str | None,
+        limit: int = 64,
+        offset: int = 0,
+    ) -> WorkoutPaginatedResponse: ...
 
     @abstractmethod
     async def create(
@@ -53,11 +62,19 @@ class DefaultWorkoutService(IWorkoutService):
     async def retrieve(self, *, workout_id: str | int) -> Workout:
         return await self._workout_api_client.retrieve(workout_id=workout_id)
 
-    async def list(self, *, user_id: int | str | None) -> list[Workout]:
+    async def list(
+        self,
+        *,
+        user_id: int | str | None,
+        limit: int = 64,
+        offset: int = 0,
+    ) -> WorkoutPaginatedResponse:
         api_user_id = await self._auth_service.get_user_id_by_tg_user_id(
             user_id=user_id
         )
-        return await self._workout_api_client.list(user_id=api_user_id)
+        return await self._workout_api_client.list(
+            user_id=api_user_id, limit=limit, offset=offset
+        )
 
     @BaseService.refresh_tokens_on_unauthorized
     async def create(
@@ -79,8 +96,8 @@ class DefaultWorkoutService(IWorkoutService):
     ) -> Workout:
         access_token = await self._token_manager.get_access_token(user_id)
 
-        _duration = parse_duration_string(duration)
-        _break_time = parse_duration_string(break_time)
+        _duration = await parse_duration_string(duration)
+        _break_time = await parse_duration_string(break_time)
 
         if _duration > self._validation_settings.max_exercise_duration:
             raise ExerciseDurationTooLongError
@@ -89,8 +106,11 @@ class DefaultWorkoutService(IWorkoutService):
             raise ExerciseBreakTooLongError
 
         exercise = await self._exercise_api_client.create(
-            access_token, name, description, to_nanoseconds(_duration),
+            access_token,
+            name,
+            description,
+            await to_nanoseconds(_duration),
         )
         return await self._workout_api_client.add_exercise(
-            access_token, workout_id, exercise.id, to_nanoseconds(_break_time)
+            access_token, workout_id, exercise.id, await to_nanoseconds(_break_time)
         )

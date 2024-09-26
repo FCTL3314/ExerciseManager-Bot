@@ -33,7 +33,7 @@ class Bootstrap:
             env_loader=EnvironmentConfigLoader(),
             settings_loader=SettingsLoader(),
         )
-        return loader.load()
+        return await loader.load()
 
     @staticmethod
     async def _init_storage(config: Config) -> IKeyValueRepository:

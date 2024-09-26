@@ -13,7 +13,10 @@ class IUserService(BaseService, ABC):
 
 class DefaultUserService(IUserService):
     def __init__(
-        self, auth_service: IAuthService, api_client: IUserAPIClient, token_manager: ITokenManager
+        self,
+        auth_service: IAuthService,
+        api_client: IUserAPIClient,
+        token_manager: ITokenManager,
     ) -> None:
         super().__init__(auth_service)
         self._api_client = api_client

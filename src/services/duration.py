@@ -2,21 +2,24 @@ import re
 from datetime import timedelta
 
 from src.services.exceptions import InvalidDurationStringError
-from src.services.validators.duration import DURATION_STRING_PATTERN, is_valid_duration_string
+from src.services.validators.duration import (
+    DURATION_STRING_PATTERN,
+    is_valid_duration_string,
+)
 
 
-def to_nanoseconds(duration: timedelta) -> int:
+async def to_nanoseconds(duration: timedelta) -> int:
     return int(duration.total_seconds() * 1_000_000_000)
 
 
-def from_nanoseconds(nanoseconds: int) -> timedelta:
+async def from_nanoseconds(nanoseconds: int) -> timedelta:
     seconds = nanoseconds / 1_000_000_000
     return timedelta(seconds=seconds)
 
 
-def parse_duration_string(duration_string: str) -> timedelta:
+async def parse_duration_string(duration_string: str) -> timedelta:
     try:
-        if not is_valid_duration_string(duration_string):
+        if not await is_valid_duration_string(duration_string):
             raise InvalidDurationStringError
 
         pattern = re.compile(DURATION_STRING_PATTERN)
