@@ -50,6 +50,7 @@ class WorkoutValidationSettings:
 class ExerciseValidationSettings:
     name_max_length: int
     name_min_length: int
+    max_exercise_duration: timedelta
     max_exercise_break_time: timedelta
 
 

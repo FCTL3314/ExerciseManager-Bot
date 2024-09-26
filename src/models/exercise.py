@@ -14,10 +14,9 @@ class Exercise(BaseModel):
     user: User
 
 
-class NestedExercise(BaseModel):
+class ExerciseRead(BaseModel):
     id: int
     name: str
     description: str
     duration: timedelta
     image: str | None
-

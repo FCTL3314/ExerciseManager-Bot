@@ -6,6 +6,9 @@ from src.services.api import BaseAPIClient
 
 class IWorkoutAPIClient(BaseAPIClient, ABC):
     @abstractmethod
+    async def retrieve(self, workout_id: int | str) -> Workout: ...
+
+    @abstractmethod
     async def list(self, user_id: int | str | None) -> list[Workout]: ...
 
     @abstractmethod
@@ -24,6 +27,10 @@ class IWorkoutAPIClient(BaseAPIClient, ABC):
 
 
 class DefaultWorkoutAPIClient(IWorkoutAPIClient):
+
+    async def retrieve(self, workout_id: int | str) -> Workout:
+        workout = await self.request("GET", f"workouts/{workout_id}/")
+        return Workout(**workout)
 
     async def list(self, user_id: int | str | None) -> list[Workout]:
         params = {}

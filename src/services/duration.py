@@ -2,6 +2,7 @@ import re
 from datetime import timedelta
 
 from src.services.exceptions import InvalidDurationStringError
+from src.services.validators.duration import DURATION_STRING_PATTERN, is_valid_duration_string
 
 
 def to_nanoseconds(duration: timedelta) -> int:
@@ -13,11 +14,14 @@ def from_nanoseconds(nanoseconds: int) -> timedelta:
     return timedelta(seconds=seconds)
 
 
-def parse_duration_string(time_str: str) -> timedelta:
+def parse_duration_string(duration_string: str) -> timedelta:
     try:
-        pattern = re.compile(r"(?P<value>\d+)(?P<unit>[smhd])")
+        if not is_valid_duration_string(duration_string):
+            raise InvalidDurationStringError
 
-        matches = pattern.finditer(time_str)
+        pattern = re.compile(DURATION_STRING_PATTERN)
+
+        matches = pattern.finditer(duration_string)
         delta = timedelta()
 
         units = {"s": "seconds", "m": "minutes", "h": "hours", "d": "days"}

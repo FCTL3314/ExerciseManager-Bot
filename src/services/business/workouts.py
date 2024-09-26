@@ -7,10 +7,13 @@ from src.services.api.workouts import IWorkoutAPIClient
 from src.services.business import BaseService, IAuthService
 from src.services.business.token_manager import ITokenManager
 from src.services.duration import to_nanoseconds, parse_duration_string
-from src.services.exceptions import ExerciseBreakTooLongError
+from src.services.exceptions import ExerciseBreakTooLongError, ExerciseDurationTooLongError
 
 
 class IWorkoutService(BaseService, ABC):
+    @abstractmethod
+    async def retrieve(self, *, workout_id: str | int) -> Workout: ...
+
     @abstractmethod
     async def list(self, *, user_id: int | str | None) -> list[Workout]: ...
 
@@ -47,6 +50,9 @@ class DefaultWorkoutService(IWorkoutService):
         self._token_manager = token_manager
         self._validation_settings = validation_settings
 
+    async def retrieve(self, *, workout_id: str | int) -> Workout:
+        return await self._workout_api_client.retrieve(workout_id=workout_id)
+
     async def list(self, *, user_id: int | str | None) -> list[Workout]:
         api_user_id = await self._auth_service.get_user_id_by_tg_user_id(
             user_id=user_id
@@ -75,6 +81,9 @@ class DefaultWorkoutService(IWorkoutService):
 
         _duration = parse_duration_string(duration)
         _break_time = parse_duration_string(break_time)
+
+        if _duration > self._validation_settings.max_exercise_duration:
+            raise ExerciseDurationTooLongError
 
         if _break_time > self._validation_settings.max_exercise_break_time:
             raise ExerciseBreakTooLongError

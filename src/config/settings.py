@@ -36,6 +36,9 @@ class SettingsLoader(ISettingsLoader):
         exercise_validation_config = ExerciseValidationSettings(
             name_max_length=self._config("EXERCISE_NAME_MAX_LENGTH", cast=int),
             name_min_length=self._config("EXERCISE_NAME_MIN_LENGTH", cast=int),
+            max_exercise_duration=from_nanoseconds(
+                self._config("MAX_EXERCISE_DURATION", cast=int)
+            ),
             max_exercise_break_time=from_nanoseconds(
                 self._config("MAX_EXERCISE_BREAK_TIME", cast=int)
             ),
