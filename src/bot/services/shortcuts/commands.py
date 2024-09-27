@@ -15,7 +15,7 @@ class Command:
     def description(self) -> str:
         return self._description
 
-    def as_filter(self) -> ACommand:
+    def filter(self) -> ACommand:
         return ACommand(self._name)
 
     def as_bot_command(self) -> BotCommand:
@@ -56,4 +56,8 @@ ADD_WORKOUT_COMMAND = Command(
 ADD_EXERCISE_COMMAND = Command(
     "add_exercise",
     "Add exercise for your workout.",
+)
+WORKOUT_COMMAND = Command(
+    "workout",
+    "Begin your workout session, perform exercises, and track your fitness progress for optimal results.",
 )

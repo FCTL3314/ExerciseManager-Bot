@@ -5,16 +5,19 @@ from aiogram.types import Message
 from src.bot.handlers.commands import router
 from src.bot.keyboards.inline.workouts import get_workouts_keyboard
 from src.bot.message_templates import (
-    INVALID_WORKOUT_NAME_TEMPLATE,
-    INVALID_EXERCISE_NAME_TEMPLATE,
-    NO_WORKOUTS_MESSAGE,
+    INVALID_WORKOUT_NAME_MESSAGE,
+    INVALID_EXERCISE_NAME_MESSAGE,
+    ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
+    ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
     SELECT_WORKOUT_MESSAGE,
+    NO_WORKOUTS_MESSAGE,
 )
 from src.bot.services.shortcuts.commands import (
     ADD_WORKOUT_COMMAND,
     ADD_EXERCISE_COMMAND,
+    WORKOUT_COMMAND,
 )
-from src.bot.states import WorkoutAddingStates, ExerciseAddingStates
+from src.bot.states.workout import WorkoutAddingStates, ExerciseAddingStates
 from src.config import Settings
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.exceptions import NoWorkoutsError
@@ -27,7 +30,7 @@ from src.services.validators.exercise import (
 from src.services.validators.workout import is_name_valid as is_workout_name_valid
 
 
-@router.message(ADD_WORKOUT_COMMAND.as_filter())
+@router.message(ADD_WORKOUT_COMMAND.filter())
 async def command_add_workout_handler(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
@@ -46,7 +49,7 @@ async def process_add_workout_name(
     name = message.text.strip()
     if not await is_workout_name_valid(name, settings.validation.workout):
         await message.answer(
-            INVALID_WORKOUT_NAME_TEMPLATE.format(
+            INVALID_WORKOUT_NAME_MESSAGE.format(
                 min_length=settings.validation.workout.name_min_length,
                 max_length=settings.validation.workout.name_max_length,
             ),
@@ -80,7 +83,7 @@ async def process_add_workout_description(
     )
 
 
-@router.message(ADD_EXERCISE_COMMAND.as_filter())
+@router.message(ADD_EXERCISE_COMMAND.filter())
 async def command_add_exercise_handler(
     message: Message,
     state: FSMContext,
@@ -95,11 +98,11 @@ async def command_add_exercise_handler(
             buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
         )
     except NoWorkoutsError:
-        await message.answer(NO_WORKOUTS_MESSAGE)
+        await message.answer(ADD_EXERCISE_NO_WORKOUTS_MESSAGE)
         return
 
     await state.set_state(ExerciseAddingStates.waiting_for_workout_selection)
-    await message.answer(SELECT_WORKOUT_MESSAGE, reply_markup=keyboard)
+    await message.answer(ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE, reply_markup=keyboard)
 
 
 @router.message(ExerciseAddingStates.waiting_for_name_input)
@@ -109,7 +112,7 @@ async def process_add_exercise_name(
     name = message.text.strip()
     if not is_exercise_name_valid(name, settings.validation.exercise):
         await message.answer(
-            INVALID_EXERCISE_NAME_TEMPLATE.format(
+            INVALID_EXERCISE_NAME_MESSAGE.format(
                 min_length=settings.validation.exercise.name_min_length,
                 max_length=settings.validation.exercise.name_max_length,
             ),
@@ -204,3 +207,25 @@ async def process_add_exercise_break_time(
     await message.answer(
         "✅ Упражнение успешно добавлено! 🎉\nТеперь вы можете начать тренировку или добавить ещё несколько упражнений."
     )
+
+
+@router.message(WORKOUT_COMMAND.filter())
+async def command_workout_handler(
+    message: Message,
+    state: FSMContext,
+    workout_service: WorkoutServiceProto,
+    settings: Settings,
+) -> None:
+    try:
+        keyboard = await get_workouts_keyboard(
+            user_id=message.from_user.id,
+            workout_service=workout_service,
+            limit=settings.pagination.workout.workouts_keyboard_paginate_by,
+            buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
+        )
+    except NoWorkoutsError:
+        await message.answer(NO_WORKOUTS_MESSAGE)
+        return
+
+    await state.set_state(ExerciseAddingStates.waiting_for_workout_selection)
+    await message.answer(SELECT_WORKOUT_MESSAGE, reply_markup=keyboard)

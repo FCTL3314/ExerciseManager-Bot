@@ -4,16 +4,16 @@ from aiogram.types import Message
 
 from src.bot.handlers.commands import router
 from src.bot.message_templates import (
-    INVALID_USERNAME_TEMPLATE,
-    INVALID_PASSWORD_TEMPLATE,
+    INVALID_USERNAME_MESSAGE,
+    INVALID_PASSWORD_MESSAGE,
 )
 from src.bot.services.shortcuts.commands import (
     REGISTER_COMMAND,
     LOGIN_COMMAND,
     HELP_COMMAND,
-    ME_COMMAND,
+    ME_COMMAND, CANCEL_COMMAND,
 )
-from src.bot.states import RegistrationStates, LoginStates
+from src.bot.states.user import RegistrationStates, LoginStates
 from src.config import Settings
 from src.services.business import AuthServiceProto
 from src.services.business.exceptions import PasswordsDoNotMatchError
@@ -21,7 +21,7 @@ from src.services.business.users import UserServiceProto
 from src.services.validators.user import is_username_valid, is_password_valid
 
 
-@router.message(REGISTER_COMMAND.as_filter())
+@router.message(REGISTER_COMMAND.filter())
 async def command_register_handler(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
@@ -41,7 +41,7 @@ async def process_registration_username(
     username = message.text.strip()
     if not await is_username_valid(username, settings.validation.user):
         await message.answer(
-            INVALID_USERNAME_TEMPLATE.format(
+            INVALID_USERNAME_MESSAGE.format(
                 min_length=settings.validation.user.username_min_length,
                 max_length=settings.validation.user.username_max_length,
             ),
@@ -64,7 +64,7 @@ async def process_registration_password(
     password = message.text.strip()
     if not await is_password_valid(password, settings.validation.user):
         await message.answer(
-            INVALID_PASSWORD_TEMPLATE.format(
+            INVALID_PASSWORD_MESSAGE.format(
                 min_length=settings.validation.user.username_min_length,
                 max_length=settings.validation.user.username_max_length,
             ),
@@ -105,7 +105,7 @@ async def process_registration_password_retype(
         await state.set_state(RegistrationStates.waiting_for_password_input)
 
 
-@router.message(LOGIN_COMMAND.as_filter())
+@router.message(LOGIN_COMMAND.filter())
 async def command_login_handler(message: Message, state: FSMContext) -> None:
     await state.set_state(LoginStates.waiting_for_username_input)
     await message.answer(
@@ -121,7 +121,7 @@ async def process_login_username(
     username = message.text.strip()
     if not await is_username_valid(username, settings.validation.user):
         await message.answer(
-            INVALID_USERNAME_TEMPLATE.format(
+            INVALID_USERNAME_MESSAGE.format(
                 min_length=settings.validation.user.username_min_length,
                 max_length=settings.validation.user.username_max_length,
             )
@@ -140,6 +140,7 @@ async def process_login_password(
     auth_service: AuthServiceProto,
     settings: Settings,
 ) -> None:
+    await message.delete()
     data = await state.get_data()
 
     username = data["username"]
@@ -147,27 +148,29 @@ async def process_login_password(
 
     if not await is_password_valid(password, settings.validation.user):
         await message.answer(
-            INVALID_PASSWORD_TEMPLATE.format(
+            INVALID_PASSWORD_MESSAGE.format(
                 min_length=settings.validation.user.username_min_length,
                 max_length=settings.validation.user.username_max_length,
             ),
         )
         return
 
+    processing_message = await message.answer("⏳ Пароль принят, обработка...")
+
     is_success = await auth_service.login(
         user_id=message.from_user.id, username=username, password=password
     )
     if is_success:
-        await message.answer("🎉 Вы успешно вошли в систему!")
+        await processing_message.edit_text("🎉 Вы успешно вошли в систему!")
         await state.clear()
     else:
-        await message.answer(
-            f"❌ Неправильное имя пользователя или пароль. Пожалуйста, попробуйте снова ({html.bold(LOGIN_COMMAND)})."
+        await processing_message.edit_text(
+            f"❌ Неправильное имя пользователя или пароль. Пожалуйста, введите пароль снова, или выполните команду ({html.bold(CANCEL_COMMAND)})."
         )
-        await state.clear()
+        return
 
 
-@router.message(ME_COMMAND.as_filter())
+@router.message(ME_COMMAND.filter())
 async def command_me_handler(message: Message, user_service: UserServiceProto) -> None:
     me = await user_service.me(user_id=message.from_user.id)
 

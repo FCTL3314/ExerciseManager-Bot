@@ -5,8 +5,8 @@ from aiogram.types import CallbackQuery
 from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPaginationCallback
 from src.bot.handlers.callback import router
 from src.bot.keyboards.inline.workouts import get_workouts_keyboard
-from src.bot.message_templates import NO_WORKOUTS_MESSAGE, SELECT_WORKOUT_MESSAGE
-from src.bot.states import ExerciseAddingStates
+from src.bot.message_templates import ADD_EXERCISE_NO_WORKOUTS_MESSAGE, ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE
+from src.bot.states.workout import ExerciseAddingStates
 from src.config import Settings
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.exceptions import NoWorkoutsError
@@ -28,11 +28,11 @@ async def process_workout_pagination(
             buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
         )
     except NoWorkoutsError:
-        await callback_query.message.edit_text(NO_WORKOUTS_MESSAGE)
+        await callback_query.message.edit_text(ADD_EXERCISE_NO_WORKOUTS_MESSAGE)
         return
 
     await callback_query.message.edit_text(
-        SELECT_WORKOUT_MESSAGE, reply_markup=keyboard
+        ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE, reply_markup=keyboard
     )
 
 
