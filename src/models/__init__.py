@@ -54,9 +54,13 @@ def create_timedelta_from_nanoseconds_validator(
     @field_validator(field_name, mode="before")
     def parse_timedelta_from_nanoseconds(
         cls: Type[Any], value: Any, info: FieldValidationInfo  # noqa
-    ) -> timedelta:
-        if isinstance(value, (int, float)):
+    ) -> Any:
+        if not isinstance(value, (int, float, str)):
+            return value
+
+        try:
             return from_nanoseconds(int(value))
-        return value
+        except ValueError:
+            return value
 
     return parse_timedelta_from_nanoseconds
