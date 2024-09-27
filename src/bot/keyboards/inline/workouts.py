@@ -9,6 +9,7 @@ from src.services.exceptions import NoWorkoutsError
 async def get_workouts_keyboard(
     user_id: int | str,
     workout_service: IWorkoutService,
+    buttons_per_row: int,
     limit: int,
     offset: int = 0,
     current_page: int = 1,
@@ -52,5 +53,5 @@ async def get_workouts_keyboard(
 
     return InlineKeyboardMarkup(
         row_width=1,
-        inline_keyboard=[*chunk_list(workouts_btns, 3), pagination_btns],
+        inline_keyboard=[*chunk_list(workouts_btns, buttons_per_row), pagination_btns],
     )

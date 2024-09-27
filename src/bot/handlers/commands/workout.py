@@ -90,6 +90,7 @@ async def command_add_exercise_handler(
             user_id=message.from_user.id,
             workout_service=workout_service,
             limit=settings.pagination.workout.workouts_keyboard_paginate_by,
+            buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
         )
     except NoWorkoutsError:
         await message.answer(

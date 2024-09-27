@@ -30,6 +30,7 @@ async def process_workout_pagination(
             limit=limit,
             offset=offset,
             current_page=callback_data.page,
+            buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
         )
     except NoWorkoutsError:
         await callback_query.message.edit_text(

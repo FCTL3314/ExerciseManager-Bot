@@ -74,6 +74,7 @@ class LocalizationSettings:
 @dataclass(frozen=True)
 class WorkoutPaginationSettings:
     workouts_keyboard_paginate_by: int
+    workouts_keyboard_buttons_per_row: int
 
 
 @dataclass(frozen=True)

@@ -57,6 +57,9 @@ class SettingsLoader(ISettingsLoader):
             workouts_keyboard_paginate_by=self._config(
                 "WORKOUTS_KEYBOARD_PAGINATE_BY", cast=int
             ),
+            workouts_keyboard_buttons_per_row=self._config(
+                "WORKOUT_KEYBOARD_BUTTONS_PER_ROW", cast=int
+            ),
         )
 
         return PaginationSettings(
