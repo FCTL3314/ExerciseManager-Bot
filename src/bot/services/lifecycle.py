@@ -9,6 +9,7 @@ from src.bot.services.shortcuts.commands import (
     ADD_WORKOUT_COMMAND,
     ADD_EXERCISE_COMMAND,
     CANCEL_COMMAND,
+    WORKOUT_COMMAND,
 )
 
 
@@ -24,6 +25,7 @@ async def _set_bot_commands(bot: Bot) -> None:
             ADD_WORKOUT_COMMAND.as_bot_command(),
             ADD_EXERCISE_COMMAND.as_bot_command(),
             CANCEL_COMMAND.as_bot_command(),
+            WORKOUT_COMMAND.as_bot_command(),
         ]
     )
     # fmt: on

@@ -10,7 +10,7 @@ from src.services.collections import chunk_list
 from src.services.exceptions import NoWorkoutsError
 
 
-async def get_workouts_keyboard(
+async def get_select_workout_keyboard(
     user_id: int | str,
     workout_service: WorkoutServiceProto,
     buttons_per_row: int,

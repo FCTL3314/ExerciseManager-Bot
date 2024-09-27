@@ -3,13 +3,16 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPaginationCallback
+from src.bot.enums import MessageAction
 from src.bot.handlers.callback import router
-from src.bot.keyboards.inline.workouts import get_workouts_keyboard
-from src.bot.message_templates import ADD_EXERCISE_NO_WORKOUTS_MESSAGE, ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE
+from src.bot.message_templates import (
+    ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
+    ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
+)
+from src.bot.services.workout import send_select_workout_keyboard_or_error_message
 from src.bot.states.workout import ExerciseAddingStates
 from src.config import Settings
 from src.services.business.workouts import WorkoutServiceProto
-from src.services.exceptions import NoWorkoutsError
 
 
 @router.callback_query(WorkoutsPaginationCallback.filter())
@@ -19,20 +22,17 @@ async def process_workout_pagination(
     workout_service: WorkoutServiceProto,
     settings: Settings,
 ) -> None:
-    try:
-        keyboard = await get_workouts_keyboard(
-            user_id=callback_query.from_user.id,
-            workout_service=workout_service,
-            limit=settings.pagination.workout.workouts_keyboard_paginate_by,
-            offset=callback_data.offset,
-            buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
-        )
-    except NoWorkoutsError:
-        await callback_query.message.edit_text(ADD_EXERCISE_NO_WORKOUTS_MESSAGE)
-        return
-
-    await callback_query.message.edit_text(
-        ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE, reply_markup=keyboard
+    await send_select_workout_keyboard_or_error_message(
+        text=ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
+        no_workouts_message=ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
+        message=callback_query.message,
+        user_id=callback_query.from_user.id,
+        workout_service=workout_service,
+        limit=settings.pagination.workout.workouts_keyboard_paginate_by,
+        offset=callback_data.offset,
+        buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
+        message_action=MessageAction.edit,
+        show_loading_message=False,
     )
 
 

@@ -3,7 +3,6 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from src.bot.handlers.commands import router
-from src.bot.keyboards.inline.workouts import get_workouts_keyboard
 from src.bot.message_templates import (
     INVALID_WORKOUT_NAME_MESSAGE,
     INVALID_EXERCISE_NAME_MESSAGE,
@@ -17,10 +16,10 @@ from src.bot.services.shortcuts.commands import (
     ADD_EXERCISE_COMMAND,
     WORKOUT_COMMAND,
 )
+from src.bot.services.workout import send_select_workout_keyboard_or_error_message
 from src.bot.states.workout import WorkoutAddingStates, ExerciseAddingStates
 from src.config import Settings
 from src.services.business.workouts import WorkoutServiceProto
-from src.services.exceptions import NoWorkoutsError
 from src.services.validators.duration import is_valid_duration_string
 from src.services.validators.exercise import (
     is_name_valid as is_exercise_name_valid,
@@ -90,19 +89,16 @@ async def command_add_exercise_handler(
     workout_service: WorkoutServiceProto,
     settings: Settings,
 ) -> None:
-    try:
-        keyboard = await get_workouts_keyboard(
-            user_id=message.from_user.id,
-            workout_service=workout_service,
-            limit=settings.pagination.workout.workouts_keyboard_paginate_by,
-            buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
-        )
-    except NoWorkoutsError:
-        await message.answer(ADD_EXERCISE_NO_WORKOUTS_MESSAGE)
-        return
-
+    await send_select_workout_keyboard_or_error_message(
+        text=ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
+        no_workouts_message=ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
+        message=message,
+        user_id=message.from_user.id,
+        workout_service=workout_service,
+        limit=settings.pagination.workout.workouts_keyboard_paginate_by,
+        buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
+    )
     await state.set_state(ExerciseAddingStates.waiting_for_workout_selection)
-    await message.answer(ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE, reply_markup=keyboard)
 
 
 @router.message(ExerciseAddingStates.waiting_for_name_input)
@@ -216,16 +212,13 @@ async def command_workout_handler(
     workout_service: WorkoutServiceProto,
     settings: Settings,
 ) -> None:
-    try:
-        keyboard = await get_workouts_keyboard(
-            user_id=message.from_user.id,
-            workout_service=workout_service,
-            limit=settings.pagination.workout.workouts_keyboard_paginate_by,
-            buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
-        )
-    except NoWorkoutsError:
-        await message.answer(NO_WORKOUTS_MESSAGE)
-        return
-
+    await send_select_workout_keyboard_or_error_message(
+        text=SELECT_WORKOUT_MESSAGE,
+        no_workouts_message=NO_WORKOUTS_MESSAGE,
+        message=message,
+        user_id=message.from_user.id,
+        workout_service=workout_service,
+        limit=settings.pagination.workout.workouts_keyboard_paginate_by,
+        buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
+    )
     await state.set_state(ExerciseAddingStates.waiting_for_workout_selection)
-    await message.answer(SELECT_WORKOUT_MESSAGE, reply_markup=keyboard)
