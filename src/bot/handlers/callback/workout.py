@@ -36,7 +36,9 @@ async def process_workout_pagination(
     )
 
 
-@router.callback_query(WorkoutsSelectCallback.filter())
+@router.callback_query(
+    ExerciseAddingStates.waiting_for_workout_selection, WorkoutsSelectCallback.filter()
+)
 async def process_add_exercise_workout_selection(
     callback_query: CallbackQuery,
     callback_data: WorkoutsSelectCallback,
