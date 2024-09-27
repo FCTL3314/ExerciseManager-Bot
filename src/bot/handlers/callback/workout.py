@@ -2,7 +2,7 @@ from aiogram import html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
-from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPageCallback
+from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPaginationCallback
 from src.bot.handlers.callback import router
 from src.bot.keyboards.inline.workouts import get_workouts_keyboard
 from src.bot.services.shortcuts.commands import ADD_WORKOUT_COMMAND
@@ -12,23 +12,19 @@ from src.services.business.workouts import WorkoutServiceProto
 from src.services.exceptions import NoWorkoutsError
 
 
-@router.callback_query(WorkoutsPageCallback.filter())
+@router.callback_query(WorkoutsPaginationCallback.filter())
 async def process_workout_pagination(
     callback_query: CallbackQuery,
-    callback_data: WorkoutsPageCallback,
+    callback_data: WorkoutsPaginationCallback,
     workout_service: WorkoutServiceProto,
     settings: Settings,
 ) -> None:
-    limit = settings.pagination.workout.workouts_keyboard_paginate_by
-    offset = (callback_data.page - 1) * limit
-
     try:
         keyboard = await get_workouts_keyboard(
             user_id=callback_query.from_user.id,
             workout_service=workout_service,
-            limit=limit,
-            offset=offset,
-            current_page=callback_data.page,
+            limit=settings.pagination.workout.workouts_keyboard_paginate_by,
+            offset=callback_data.offset,
             buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
         )
     except NoWorkoutsError:

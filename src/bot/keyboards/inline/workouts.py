@@ -1,6 +1,6 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPageCallback
+from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPaginationCallback
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.collections import chunk_list
 from src.services.exceptions import NoWorkoutsError
@@ -12,7 +12,6 @@ async def get_workouts_keyboard(
     buttons_per_row: int,
     limit: int,
     offset: int = 0,
-    current_page: int = 1,
 ) -> InlineKeyboardMarkup:
     paginated_workouts = await workout_service.list(
         user_id=user_id, limit=limit, offset=offset
@@ -31,22 +30,22 @@ async def get_workouts_keyboard(
 
     pagination_btns = []
 
-    if current_page > 1:
+    if paginated_workouts.has_previous:
         pagination_btns.append(
             InlineKeyboardButton(
                 text="⬅️ Предыдущая",
-                callback_data=WorkoutsPageCallback(
-                    action="prev", page=current_page - 1
+                callback_data=WorkoutsPaginationCallback(
+                    offset=paginated_workouts.previous_offset,
                 ).pack(),
             )
         )
 
-    if current_page < paginated_workouts.total_pages:
+    if paginated_workouts.has_next:
         pagination_btns.append(
             InlineKeyboardButton(
                 text="Следующая ➡️",
-                callback_data=WorkoutsPageCallback(
-                    action="next", page=current_page + 1
+                callback_data=WorkoutsPaginationCallback(
+                    offset=paginated_workouts.next_offset,
                 ).pack(),
             )
         )
