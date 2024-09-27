@@ -6,7 +6,7 @@ from src.services.api.exercises import ExerciseAPIClientProto
 from src.services.api.workouts import WorkoutAPIClientProto
 from src.services.business import BaseService, AuthServiceProto, BaseServiceProto
 from src.services.business.token_manager import TokenManagerProto
-from src.services.duration import to_nanoseconds, parse_duration_string
+from src.services.duration import ato_nanoseconds, parse_duration_string
 from src.services.exceptions import (
     ExerciseBreakTooLongError,
     ExerciseDurationTooLongError,
@@ -100,8 +100,8 @@ class DefaultWorkoutService(BaseService):
             access_token,
             name,
             description,
-            await to_nanoseconds(_duration),
+            await ato_nanoseconds(_duration),
         )
         return await self._workout_api_client.add_exercise(
-            access_token, workout_id, exercise.id, await to_nanoseconds(_break_time)
+            access_token, workout_id, exercise.id, await ato_nanoseconds(_break_time)
         )

@@ -2,6 +2,9 @@ from datetime import timedelta
 
 from pydantic import BaseModel
 
+from src.models import (
+    create_timedelta_from_nanoseconds_validator,
+)
 from src.models.user import User
 
 
@@ -13,6 +16,8 @@ class Exercise(BaseModel):
     image: str | None
     user: User
 
+    _duration_from_nanoseconds = create_timedelta_from_nanoseconds_validator("duration")
+
 
 class ExerciseRead(BaseModel):
     id: int
@@ -20,3 +25,5 @@ class ExerciseRead(BaseModel):
     description: str
     duration: timedelta
     image: str | None
+
+    _duration_from_nanoseconds = create_timedelta_from_nanoseconds_validator("duration")

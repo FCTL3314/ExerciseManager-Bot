@@ -1,7 +1,11 @@
-from typing import Generic, TypeVar
+from collections.abc import Callable
+from datetime import timedelta
+from typing import Generic, TypeVar, Any, Type
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+from pydantic_core.core_schema import FieldValidationInfo
 
+from src.services.duration import from_nanoseconds
 
 T = TypeVar("T")
 
@@ -41,3 +45,18 @@ class PaginatedResponse(BaseModel, Generic[T]):
     @property
     def has_next(self) -> bool:
         return self.current_page < self.total_pages
+
+
+def create_timedelta_from_nanoseconds_validator(
+    field_name: str,
+) -> Callable[[Type[Any], Any, FieldValidationInfo], timedelta]:
+
+    @field_validator(field_name, mode="before")
+    def parse_timedelta_from_nanoseconds(
+        cls: Type[Any], value: Any, info: FieldValidationInfo  # noqa
+    ) -> timedelta:
+        if isinstance(value, (int, float)):
+            return from_nanoseconds(int(value))
+        return value
+
+    return parse_timedelta_from_nanoseconds

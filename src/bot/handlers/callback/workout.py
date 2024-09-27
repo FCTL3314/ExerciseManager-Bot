@@ -5,12 +5,13 @@ from aiogram.types import CallbackQuery
 from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPaginationCallback
 from src.bot.enums import MessageAction
 from src.bot.handlers.callback import router
+from src.bot.keyboards.inline.workouts import get_start_workout_keyboard
 from src.bot.message_templates import (
     ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
     ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
 )
 from src.bot.services.workout import send_select_workout_keyboard_or_error_message
-from src.bot.states.workout import ExerciseAddingStates
+from src.bot.states.workout import ExerciseAddingStates, StartWorkoutStates
 from src.config import Settings
 from src.services.business.workouts import WorkoutServiceProto
 
@@ -46,10 +47,10 @@ async def process_add_exercise_workout_selection(
     workout_service: WorkoutServiceProto,
 ) -> None:
     await state.update_data(workout_id=callback_data.workout_id)
-    await state.set_state(ExerciseAddingStates.waiting_for_name_input)
 
     workout = await workout_service.retrieve(workout_id=callback_data.workout_id)
 
+    await state.set_state(ExerciseAddingStates.waiting_for_name_input)
     await callback_query.message.edit_text(
         f"📋 Вы выбрали тренировку: {html.bold(workout.name)}.\n\n"
         "📝 Теперь давайте добавим новое упражнение.\n\n"
@@ -57,4 +58,25 @@ async def process_add_exercise_workout_selection(
         f"Например: {html.bold("Отжимания")}, {html.bold("Приседания")} или {html.bold("Планка")}."
     )
 
-    await callback_query.answer()
+
+@router.callback_query(
+    StartWorkoutStates.waiting_for_workout_selection, WorkoutsSelectCallback.filter()
+)
+async def process_start_workout_workout_selection(
+    callback_query: CallbackQuery,
+    callback_data: WorkoutsSelectCallback,
+    state: FSMContext,
+    workout_service: WorkoutServiceProto,
+) -> None:
+    await state.update_data(current_workout_id=callback_data.workout_id)
+
+    workout = await workout_service.retrieve(workout_id=callback_data.workout_id)
+    keyboard = await get_start_workout_keyboard()
+
+    await state.set_state(StartWorkoutStates.doing_workout)
+    await callback_query.message.edit_text(
+        f"💪 Вы выбрали тренировку: {html.bold(workout.name)}!\n\n"
+        f"🔹 Тренировка состоит из {workout.exercises_count} упражнений!\n"
+        f"🔹 Приблизительное время тренировки - {workout.workout_duration.seconds // 60} минут!",
+        reply_markup=keyboard,
+    )

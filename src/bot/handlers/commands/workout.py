@@ -8,16 +8,20 @@ from src.bot.message_templates import (
     INVALID_EXERCISE_NAME_MESSAGE,
     ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
     ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
-    SELECT_WORKOUT_MESSAGE,
-    NO_WORKOUTS_MESSAGE,
+    START_WORKOUT_WORKOUT_SELECTION_MESSAGE,
+    START_WORKOUT_NO_WORKOUTS_MESSAGE,
 )
 from src.bot.services.shortcuts.commands import (
     ADD_WORKOUT_COMMAND,
     ADD_EXERCISE_COMMAND,
-    WORKOUT_COMMAND,
+    START_WORKOUT_COMMAND,
 )
 from src.bot.services.workout import send_select_workout_keyboard_or_error_message
-from src.bot.states.workout import WorkoutAddingStates, ExerciseAddingStates
+from src.bot.states.workout import (
+    WorkoutAddingStates,
+    ExerciseAddingStates,
+    StartWorkoutStates,
+)
 from src.config import Settings
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.validators.duration import is_valid_duration_string
@@ -106,7 +110,7 @@ async def process_add_exercise_name(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
     name = message.text.strip()
-    if not is_exercise_name_valid(name, settings.validation.exercise):
+    if not await is_exercise_name_valid(name, settings.validation.exercise):
         await message.answer(
             INVALID_EXERCISE_NAME_MESSAGE.format(
                 min_length=settings.validation.exercise.name_min_length,
@@ -119,7 +123,7 @@ async def process_add_exercise_name(
     await state.set_state(ExerciseAddingStates.waiting_for_description_input)
     await message.answer(
         f"Отлично! ✅\n\n"
-        "2️⃣ Пожалуйста, опишите ваше упражнение (это необязательно, но поможет вам лучше организоваться):"
+        f"🔹 {html.bold("Шаг 2:")} Пожалуйста, опишите ваше упражнение (это необязательно, но поможет вам лучше организоваться):"
     )
 
 
@@ -131,7 +135,7 @@ async def process_add_exercise_description(message: Message, state: FSMContext) 
     await state.set_state(ExerciseAddingStates.waiting_for_duration_input)
     await message.answer(
         f"Отлично! ✅\n\n"
-        f"3️⃣ Теперь введите продолжительность выполнения упражнения. Например, {html.bold('1m')} для 1 минуты или {html.bold('30s')} для 30 секунд:"
+        f" {html.bold("Шаг 3:")} Теперь введите продолжительность выполнения упражнения. Например, {html.bold('1m')} для 1 минуты или {html.bold('30s')} для 30 секунд:"
     )
 
 
@@ -201,24 +205,24 @@ async def process_add_exercise_break_time(
 
     await state.clear()
     await message.answer(
-        "✅ Упражнение успешно добавлено! 🎉\nТеперь вы можете начать тренировку или добавить ещё несколько упражнений."
+        f"✅ Упражнение успешно добавлено! 🎉\nТеперь вы можете начать тренировку({html.bold(START_WORKOUT_COMMAND)}) или добавить ещё несколько упражнений."
     )
 
 
-@router.message(WORKOUT_COMMAND.filter())
-async def command_workout_handler(
+@router.message(START_WORKOUT_COMMAND.filter())
+async def command_start_workout_handler(
     message: Message,
     state: FSMContext,
     workout_service: WorkoutServiceProto,
     settings: Settings,
 ) -> None:
     await send_select_workout_keyboard_or_error_message(
-        text=SELECT_WORKOUT_MESSAGE,
-        no_workouts_message=NO_WORKOUTS_MESSAGE,
+        text=START_WORKOUT_WORKOUT_SELECTION_MESSAGE,
+        no_workouts_message=START_WORKOUT_NO_WORKOUTS_MESSAGE,
         message=message,
         user_id=message.from_user.id,
         workout_service=workout_service,
         limit=settings.pagination.workout.workouts_keyboard_paginate_by,
         buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
     )
-    await state.set_state(ExerciseAddingStates.waiting_for_workout_selection)
+    await state.set_state(StartWorkoutStates.waiting_for_workout_selection)

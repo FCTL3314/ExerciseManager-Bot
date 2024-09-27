@@ -11,7 +11,7 @@ from src.config.types import (
     PaginationSettings,
     WorkoutPaginationSettings,
 )
-from src.services.duration import from_nanoseconds
+from src.services.duration import afrom_nanoseconds
 
 
 class SettingsLoader(SettingsLoaderProto):
@@ -38,10 +38,10 @@ class SettingsLoader(SettingsLoaderProto):
         exercise_validation = ExerciseValidationSettings(
             name_max_length=self._config("EXERCISE_NAME_MAX_LENGTH", cast=int),
             name_min_length=self._config("EXERCISE_NAME_MIN_LENGTH", cast=int),
-            max_exercise_duration=await from_nanoseconds(
+            max_exercise_duration=await afrom_nanoseconds(
                 self._config("MAX_EXERCISE_DURATION", cast=int)
             ),
-            max_exercise_break_time=await from_nanoseconds(
+            max_exercise_break_time=await afrom_nanoseconds(
                 self._config("MAX_EXERCISE_BREAK_TIME", cast=int)
             ),
         )

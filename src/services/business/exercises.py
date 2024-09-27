@@ -5,7 +5,7 @@ from src.models.exercise import Exercise
 from src.services.api.exercises import ExerciseAPIClientProto
 from src.services.business import BaseService, AuthServiceProto, BaseServiceProto
 from src.services.business.token_manager import TokenManagerProto
-from src.services.duration import to_nanoseconds
+from src.services.duration import ato_nanoseconds
 
 
 @runtime_checkable
@@ -31,5 +31,5 @@ class DefaultExerciseService(BaseService):
         self, user_id: int | str, name: str, description: str, duration: timedelta
     ) -> Exercise:
         access_token = await self._token_manager.get_access_token(user_id)
-        _duration = await to_nanoseconds(duration)
+        _duration = await ato_nanoseconds(duration)
         return await self._api_client.create(access_token, name, description, _duration)

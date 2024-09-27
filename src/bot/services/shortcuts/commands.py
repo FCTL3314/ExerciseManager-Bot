@@ -57,7 +57,7 @@ ADD_EXERCISE_COMMAND = Command(
     "add_exercise",
     "Add exercise for your workout.",
 )
-WORKOUT_COMMAND = Command(
-    "workout",
+START_WORKOUT_COMMAND = Command(
+    "start_workout",
     "Begin your workout session, perform exercises, and track your fitness progress for optimal results.",
 )

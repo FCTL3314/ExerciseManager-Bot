@@ -7,3 +7,4 @@ aiohttp[speedups]==3.10.5
 pydantic==2.9.2
 babel==2.16.0
 polib==1.2.0
+asgiref==3.8.1

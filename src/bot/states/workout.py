@@ -14,6 +14,6 @@ class ExerciseAddingStates(StatesGroup):
     waiting_for_break_time_input = State()
 
 
-class WorkoutStates(StatesGroup):
+class StartWorkoutStates(StatesGroup):
     waiting_for_workout_selection = State()
     doing_workout = State()
