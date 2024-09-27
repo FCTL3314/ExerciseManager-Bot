@@ -1,11 +1,11 @@
-from abc import ABC, abstractmethod
+from typing import runtime_checkable, Protocol
 
 from src.config.types import ExerciseValidationSettings
 from src.models.workout import Workout, WorkoutPaginatedResponse
-from src.services.api.exercises import IExerciseAPIClient
-from src.services.api.workouts import IWorkoutAPIClient
-from src.services.business import BaseService, IAuthService
-from src.services.business.token_manager import ITokenManager
+from src.services.api.exercises import ExerciseAPIClientProto
+from src.services.api.workouts import WorkoutAPIClientProto
+from src.services.business import BaseService, AuthServiceProto, BaseServiceProto
+from src.services.business.token_manager import TokenManagerProto
 from src.services.duration import to_nanoseconds, parse_duration_string
 from src.services.exceptions import (
     ExerciseBreakTooLongError,
@@ -13,28 +13,23 @@ from src.services.exceptions import (
 )
 
 
-class IWorkoutService(BaseService, ABC):
-    @abstractmethod
-    async def retrieve(self, *, workout_id: str | int) -> Workout: ...
+@runtime_checkable
+class WorkoutServiceProto(BaseServiceProto, Protocol):
+    async def retrieve(self, workout_id: str | int) -> Workout: ...
 
-    @abstractmethod
     async def list(
         self,
-        *,
         user_id: int | str | None,
         limit: int = 64,
         offset: int = 0,
     ) -> WorkoutPaginatedResponse: ...
 
-    @abstractmethod
     async def create(
-        self, *, user_id: int | str, name: str, description: str
+        self, user_id: int | str, name: str, description: str
     ) -> Workout: ...
 
-    @abstractmethod
     async def add_exercise(
         self,
-        *,
         user_id: int | str,
         workout_id: int | str,
         name: str,
@@ -44,13 +39,13 @@ class IWorkoutService(BaseService, ABC):
     ) -> Workout: ...
 
 
-class DefaultWorkoutService(IWorkoutService):
+class DefaultWorkoutService(BaseService):
     def __init__(
         self,
-        auth_service: IAuthService,
-        workout_api_client: IWorkoutAPIClient,
-        exercise_api_client: IExerciseAPIClient,
-        token_manager: ITokenManager,
+        auth_service: AuthServiceProto,
+        workout_api_client: WorkoutAPIClientProto,
+        exercise_api_client: ExerciseAPIClientProto,
+        token_manager: TokenManagerProto,
         validation_settings: ExerciseValidationSettings,
     ) -> None:
         super().__init__(auth_service)
@@ -59,12 +54,11 @@ class DefaultWorkoutService(IWorkoutService):
         self._token_manager = token_manager
         self._validation_settings = validation_settings
 
-    async def retrieve(self, *, workout_id: str | int) -> Workout:
+    async def retrieve(self, workout_id: str | int) -> Workout:
         return await self._workout_api_client.retrieve(workout_id=workout_id)
 
     async def list(
         self,
-        *,
         user_id: int | str | None,
         limit: int = 64,
         offset: int = 0,
@@ -77,16 +71,13 @@ class DefaultWorkoutService(IWorkoutService):
         )
 
     @BaseService.refresh_tokens_on_unauthorized
-    async def create(
-        self, *, user_id: int | str, name: str, description: str
-    ) -> Workout:
+    async def create(self, user_id: int | str, name: str, description: str) -> Workout:
         access_token = await self._token_manager.get_access_token(user_id)
         return await self._workout_api_client.create(access_token, name, description)
 
     @BaseService.refresh_tokens_on_unauthorized
     async def add_exercise(
         self,
-        *,
         user_id: int | str,
         workout_id: int | str,
         name: str,

@@ -14,7 +14,7 @@ from src.bot.services.shortcuts.commands import (
 )
 from src.bot.states import WorkoutAddingStates, ExerciseAddingStates
 from src.config import Settings
-from src.services.business.workouts import IWorkoutService
+from src.services.business.workouts import WorkoutServiceProto
 from src.services.exceptions import NoWorkoutsError
 from src.services.validators.duration import is_valid_duration_string
 from src.services.validators.exercise import (
@@ -61,7 +61,7 @@ async def process_add_workout_name(
 
 @router.message(WorkoutAddingStates.waiting_for_description_input)
 async def process_add_workout_description(
-    message: Message, state: FSMContext, workout_service: IWorkoutService
+    message: Message, state: FSMContext, workout_service: WorkoutServiceProto
 ) -> None:
     data = await state.get_data()
 
@@ -82,7 +82,7 @@ async def process_add_workout_description(
 async def command_add_exercise_handler(
     message: Message,
     state: FSMContext,
-    workout_service: IWorkoutService,
+    workout_service: WorkoutServiceProto,
     settings: Settings,
 ) -> None:
     try:
@@ -98,7 +98,6 @@ async def command_add_exercise_handler(
         )
         return
 
-    await state.update_data(page=1)
     await state.set_state(ExerciseAddingStates.waiting_for_workout_selection)
     await message.answer(
         "📋 Выберите тренировку, к которой хотите добавить упражнение:",
@@ -171,7 +170,7 @@ async def process_add_exercise_duration(
 async def process_add_exercise_break_time(
     message: Message,
     state: FSMContext,
-    workout_service: IWorkoutService,
+    workout_service: WorkoutServiceProto,
     settings: Settings,
 ) -> None:
     data = await state.get_data()

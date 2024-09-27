@@ -1,14 +1,13 @@
-from abc import ABC, abstractmethod
+from typing import Protocol, runtime_checkable
 
 from src.models.workout import Workout, WorkoutPaginatedResponse
-from src.services.api import BaseAPIClient
+from src.services.api import BaseAPIClientProto, BaseAPIClient
 
 
-class IWorkoutAPIClient(BaseAPIClient, ABC):
-    @abstractmethod
+@runtime_checkable
+class WorkoutAPIClientProto(BaseAPIClientProto, Protocol):
     async def retrieve(self, workout_id: int | str) -> Workout: ...
 
-    @abstractmethod
     async def list(
         self,
         user_id: int | str | None,
@@ -16,12 +15,10 @@ class IWorkoutAPIClient(BaseAPIClient, ABC):
         offset: int,
     ) -> WorkoutPaginatedResponse: ...
 
-    @abstractmethod
     async def create(
         self, access_token: str, name: str, description: str
     ) -> Workout: ...
 
-    @abstractmethod
     async def add_exercise(
         self,
         access_token: str,
@@ -31,7 +28,7 @@ class IWorkoutAPIClient(BaseAPIClient, ABC):
     ) -> Workout: ...
 
 
-class DefaultWorkoutAPIClient(IWorkoutAPIClient):
+class DefaultWorkoutAPIClient(BaseAPIClient):
 
     async def retrieve(self, workout_id: int | str) -> Workout:
         workout = await self.request("GET", f"workouts/{workout_id}/")

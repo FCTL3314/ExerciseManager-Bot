@@ -1,14 +1,14 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPageCallback
-from src.services.business.workouts import IWorkoutService
+from src.services.business.workouts import WorkoutServiceProto
 from src.services.collections import chunk_list
 from src.services.exceptions import NoWorkoutsError
 
 
 async def get_workouts_keyboard(
     user_id: int | str,
-    workout_service: IWorkoutService,
+    workout_service: WorkoutServiceProto,
     buttons_per_row: int,
     limit: int,
     offset: int = 0,

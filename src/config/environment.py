@@ -1,10 +1,10 @@
 from decouple import RepositoryEnv, Config
 
-from src.config import IEnvironmentConfigLoader
+from src.config import EnvironmentConfigLoaderProto
 from src.config.types import BotConfig, EnvironmentConfig, RedisConfig, APIConfig
 
 
-class EnvironmentConfigLoader(IEnvironmentConfigLoader):
+class EnvironmentConfigLoader(EnvironmentConfigLoaderProto):
     def __init__(self) -> None:
         self._config = Config(RepositoryEnv(".env"))
 

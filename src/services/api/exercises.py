@@ -1,17 +1,18 @@
-from abc import ABC, abstractmethod
+from mypy.semanal_shared import Protocol
+from typing import runtime_checkable
 
 from src.models.exercise import Exercise
-from src.services.api import BaseAPIClient
+from src.services.api import BaseAPIClientProto, BaseAPIClient
 
 
-class IExerciseAPIClient(BaseAPIClient, ABC):
-    @abstractmethod
+@runtime_checkable
+class ExerciseAPIClientProto(BaseAPIClientProto, Protocol):
     async def create(
         self, access_token: str, name: str, description: str, duration: int
     ) -> Exercise: ...
 
 
-class DefaultExerciseAPIClient(IExerciseAPIClient):
+class DefaultExerciseAPIClient(BaseAPIClient):
 
     async def create(
         self, access_token: str, name: str, description: str, duration: int

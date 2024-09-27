@@ -3,11 +3,11 @@ from logging import Logger
 
 from src.bot.types import Bot
 from src.config.types import Config
-from src.database import IKeyValueRepository
-from src.services.business.auth import IAuthService
-from src.services.business.exercises import IExerciseService
-from src.services.business.users import IUserService
-from src.services.business.workouts import IWorkoutService
+from src.database import KeyValueRepositoryProto
+from src.services.business.auth import AuthServiceProto
+from src.services.business.exercises import ExerciseServiceProto
+from src.services.business.users import UserServiceProto
+from src.services.business.workouts import WorkoutServiceProto
 
 
 @dataclass(frozen=True)
@@ -17,16 +17,16 @@ class LoggerGroup:
 
 @dataclass(frozen=True)
 class Services:
-    auth: IAuthService
-    user: IUserService
-    workout: IWorkoutService
-    exercise: IExerciseService
+    auth: AuthServiceProto
+    user: UserServiceProto
+    workout: WorkoutServiceProto
+    exercise: ExerciseServiceProto
 
 
 @dataclass(frozen=True)
 class App:
     config: Config
-    storage: IKeyValueRepository
+    storage: KeyValueRepositoryProto
     logger_group: LoggerGroup
     services: Services
     bot: Bot

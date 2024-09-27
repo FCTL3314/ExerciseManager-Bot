@@ -15,3 +15,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
     @property
     def total_pages(self) -> int:
         return (self.count + self.limit - 1) // self.limit
+
+    @property
+    def current_page(self) -> int:
+        return (self.offset // self.limit) + 1

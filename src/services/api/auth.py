@@ -1,22 +1,20 @@
-from abc import ABC, abstractmethod
+from typing import Protocol, runtime_checkable
 
 from src.models.auth import TokensResponse
 from src.models.user import User
-from src.services.api import BaseAPIClient
+from src.services.api import BaseAPIClientProto, BaseAPIClient
 
 
-class IAuthAPIClient(BaseAPIClient, ABC):
-    @abstractmethod
+@runtime_checkable
+class AuthAPIClientProto(BaseAPIClientProto, Protocol):
     async def register(self, username: str, password: str) -> User: ...
 
-    @abstractmethod
     async def login(self, username: str, password: str) -> TokensResponse: ...
 
-    @abstractmethod
     async def refresh_tokens(self, refresh_token: str) -> TokensResponse: ...
 
 
-class DefaultAuthAPIClient(IAuthAPIClient):
+class DefaultAuthAPIClient(BaseAPIClient):
 
     async def register(self, username: str, password: str) -> User:
         data = await self.request(

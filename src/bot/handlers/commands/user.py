@@ -15,9 +15,9 @@ from src.bot.services.shortcuts.commands import (
 )
 from src.bot.states import RegistrationStates, LoginStates
 from src.config import Settings
-from src.services.business import IAuthService
+from src.services.business import AuthServiceProto
 from src.services.business.exceptions import PasswordsDoNotMatchError
-from src.services.business.users import IUserService
+from src.services.business.users import UserServiceProto
 from src.services.validators.user import is_username_valid, is_password_valid
 
 
@@ -78,7 +78,7 @@ async def process_registration_password(
 
 @router.message(RegistrationStates.waiting_for_password_retype_input)
 async def process_registration_password_retype(
-    message: Message, state: FSMContext, auth_service: IAuthService
+    message: Message, state: FSMContext, auth_service: AuthServiceProto
 ) -> None:
     data = await state.get_data()
 
@@ -137,7 +137,7 @@ async def process_login_username(
 async def process_login_password(
     message: Message,
     state: FSMContext,
-    auth_service: IAuthService,
+    auth_service: AuthServiceProto,
     settings: Settings,
 ) -> None:
     data = await state.get_data()
@@ -168,7 +168,7 @@ async def process_login_password(
 
 
 @router.message(ME_COMMAND.as_filter())
-async def command_me_handler(message: Message, user_service: IUserService) -> None:
+async def command_me_handler(message: Message, user_service: UserServiceProto) -> None:
     me = await user_service.me(user_id=message.from_user.id)
 
     created_at_formatted = me.created_at.strftime("%d %B %Y")

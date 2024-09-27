@@ -8,7 +8,7 @@ from src.bot.keyboards.inline.workouts import get_workouts_keyboard
 from src.bot.services.shortcuts.commands import ADD_WORKOUT_COMMAND
 from src.bot.states import ExerciseAddingStates
 from src.config import Settings
-from src.services.business.workouts import IWorkoutService
+from src.services.business.workouts import WorkoutServiceProto
 from src.services.exceptions import NoWorkoutsError
 
 
@@ -16,8 +16,7 @@ from src.services.exceptions import NoWorkoutsError
 async def process_workout_pagination(
     callback_query: CallbackQuery,
     callback_data: WorkoutsPageCallback,
-    state: FSMContext,
-    workout_service: IWorkoutService,
+    workout_service: WorkoutServiceProto,
     settings: Settings,
 ) -> None:
     limit = settings.pagination.workout.workouts_keyboard_paginate_by
@@ -39,13 +38,10 @@ async def process_workout_pagination(
         await callback_query.answer()
         return
 
-    await state.update_data(page=callback_data.page)
     await callback_query.message.edit_text(
         "📋 Выберите тренировку, к которой хотите добавить упражнение:",
         reply_markup=keyboard,
     )
-
-    await callback_query.answer()
 
 
 @router.callback_query(WorkoutsSelectCallback.filter())
@@ -53,7 +49,7 @@ async def process_add_exercise_workout_selection(
     callback_query: CallbackQuery,
     callback_data: WorkoutsSelectCallback,
     state: FSMContext,
-    workout_service: IWorkoutService,
+    workout_service: WorkoutServiceProto,
 ) -> None:
     await state.update_data(workout_id=callback_data.workout_id)
     await state.set_state(ExerciseAddingStates.waiting_for_name_input)

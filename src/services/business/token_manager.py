@@ -1,37 +1,32 @@
-from abc import ABC, abstractmethod
+from typing import Protocol
 
-from src.database import IKeyValueRepository
+from src.database import KeyValueRepositoryProto
 from src.services.business.enums import TokenType
 
 
-class ITokenManager(ABC):
+class TokenManagerProto(Protocol):
 
-    @abstractmethod
     async def get_access_token(self, user_id: str | int) -> str | None: ...
 
-    @abstractmethod
     async def get_refresh_token(self, user_id: str | int) -> str | None: ...
 
-    @abstractmethod
     async def save_access_token(
         self, user_id: str | int, access_token: str
     ) -> None: ...
 
-    @abstractmethod
     async def save_refresh_token(
         self, user_id: str | int, refresh_token: str
     ) -> None: ...
 
-    @abstractmethod
     async def save_tokens(
         self, user_id: str | int, access_token: str, refresh_token: str
     ) -> None: ...
 
 
-class TokenManager(ITokenManager):
+class TokenManager:
     def __init__(
         self,
-        storage: IKeyValueRepository,
+        storage: KeyValueRepositoryProto,
         key_pattern: str = "user_{user_id}",
     ) -> None:
         self._storage = storage

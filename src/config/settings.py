@@ -1,6 +1,6 @@
 from decouple import RepositoryEnv, Config
 
-from src.config import ISettingsLoader, Settings
+from src.config import SettingsLoaderProto, Settings
 from src.config.types import (
     LoggingSettings,
     ValidationSettings,
@@ -14,7 +14,7 @@ from src.config.types import (
 from src.services.duration import from_nanoseconds
 
 
-class SettingsLoader(ISettingsLoader):
+class SettingsLoader(SettingsLoaderProto):
 
     def __init__(self) -> None:
         self._config = Config(RepositoryEnv("settings.ini"))

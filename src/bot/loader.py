@@ -55,8 +55,8 @@ class BotLoader(IBotLoader):
     async def _init_middlewares(self, dp: Dispatcher) -> None:
         dp.update.middleware(ConfigMiddleware(self._config))
         dp.update.middleware(ServicesMiddleware(self._services))
-        dp.update.middleware(LoggingMiddleware(self._logger_group.general))
         dp.update.middleware(SimpleI18nMiddleware(self._i18n))
+        dp.update.outer_middleware(LoggingMiddleware(self._logger_group.general))
         dp.update.outer_middleware(ClearStateOnErrorMiddleware())
 
     @staticmethod

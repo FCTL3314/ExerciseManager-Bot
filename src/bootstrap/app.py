@@ -11,7 +11,7 @@ from src.config import ConfigLoader
 from src.config.environment import EnvironmentConfigLoader
 from src.config.settings import SettingsLoader
 from src.config.types import Config
-from src.database import IKeyValueRepository
+from src.database import KeyValueRepositoryProto
 from src.database.redis import RedisRepository
 from src.services.api.auth import DefaultAuthAPIClient
 from src.services.api.exercises import DefaultExerciseAPIClient
@@ -19,7 +19,7 @@ from src.services.api.users import DefaultUserAPIClient
 from src.services.api.workouts import DefaultWorkoutAPIClient
 from src.services.business.auth import DefaultAuthService
 from src.services.business.exercises import DefaultExerciseService
-from src.services.business.token_manager import TokenManager, ITokenManager
+from src.services.business.token_manager import TokenManager, TokenManagerProto
 from src.services.business.users import DefaultUserService
 from src.services.business.workouts import DefaultWorkoutService
 
@@ -36,14 +36,16 @@ class Bootstrap:
         return await loader.load()
 
     @staticmethod
-    async def _init_storage(config: Config) -> IKeyValueRepository:
+    async def _init_storage(config: Config) -> KeyValueRepositoryProto:
         storage = RedisRepository(
             host=config.env.redis.host, port=config.env.redis.port, db=0
         )
         return storage
 
     @staticmethod
-    async def _init_token_manager(storage: IKeyValueRepository) -> ITokenManager:
+    async def _init_token_manager(
+        storage: KeyValueRepositoryProto,
+    ) -> TokenManagerProto:
         return TokenManager(storage)
 
     @staticmethod
@@ -96,7 +98,9 @@ class Bootstrap:
 
     @staticmethod
     async def _init_services(
-        config: Config, token_manager: ITokenManager, storage: IKeyValueRepository
+        config: Config,
+        token_manager: TokenManagerProto,
+        storage: KeyValueRepositoryProto,
     ) -> Services:
         auth_api_client = DefaultAuthAPIClient(base_url=config.env.api.base_url)
         user_api_client = DefaultUserAPIClient(base_url=config.env.api.base_url)

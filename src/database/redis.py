@@ -1,9 +1,9 @@
 from redis.asyncio import Redis
 
-from src.database import IKeyValueRepository, KeyValueType
+from src.database import KeyValueType
 
 
-class RedisRepository(IKeyValueRepository):
+class RedisRepository:
     def __init__(self, host: str = "localhost", port: int = 6379, db: int = 0) -> None:
         self._client = Redis(host=host, port=port, db=db)
 

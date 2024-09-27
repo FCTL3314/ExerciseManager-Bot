@@ -1,17 +1,15 @@
-from abc import ABC, abstractmethod
+from mypy.semanal_shared import Protocol
 
 from src.config.types import Config, EnvironmentConfig, Settings
 
 
-class IEnvironmentConfigLoader(ABC):
+class EnvironmentConfigLoaderProto(Protocol):
 
-    @abstractmethod
     async def load(self) -> EnvironmentConfig: ...
 
 
-class ISettingsLoader(ABC):
+class SettingsLoaderProto(Protocol):
 
-    @abstractmethod
     async def load(self) -> Settings: ...
 
 
@@ -19,8 +17,8 @@ class ConfigLoader:
 
     def __init__(
         self,
-        env_loader: IEnvironmentConfigLoader,
-        settings_loader: ISettingsLoader,
+        env_loader: EnvironmentConfigLoaderProto,
+        settings_loader: SettingsLoaderProto,
     ) -> None:
         self._env_loader = env_loader
         self._settings_loader = settings_loader
