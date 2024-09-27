@@ -5,7 +5,7 @@ from aiogram.types import CallbackQuery
 from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPaginationCallback
 from src.bot.handlers.callback import router
 from src.bot.keyboards.inline.workouts import get_workouts_keyboard
-from src.bot.services.shortcuts.commands import ADD_WORKOUT_COMMAND
+from src.bot.message_templates import NO_WORKOUTS_MESSAGE, SELECT_WORKOUT_MESSAGE
 from src.bot.states import ExerciseAddingStates
 from src.config import Settings
 from src.services.business.workouts import WorkoutServiceProto
@@ -28,15 +28,11 @@ async def process_workout_pagination(
             buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
         )
     except NoWorkoutsError:
-        await callback_query.message.edit_text(
-            f"❌ У вас пока нет созданных тренировок. Пожалуйста, создайте тренировку перед добавлением упражнений, используя команду {html.bold(ADD_WORKOUT_COMMAND)}."
-        )
-        await callback_query.answer()
+        await callback_query.message.edit_text(NO_WORKOUTS_MESSAGE)
         return
 
     await callback_query.message.edit_text(
-        "📋 Выберите тренировку, к которой хотите добавить упражнение:",
-        reply_markup=keyboard,
+        SELECT_WORKOUT_MESSAGE, reply_markup=keyboard
     )
 
 

@@ -1,6 +1,9 @@
 from aiogram.filters.callback_data import CallbackData
 
 
+class DisabledCallback(CallbackData, prefix="disabled"):
+    ...
+
 class WorkoutsSelectCallback(CallbackData, prefix="selected_workout"):
     workout_id: int
 

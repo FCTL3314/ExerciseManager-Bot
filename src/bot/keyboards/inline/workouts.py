@@ -1,6 +1,10 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-from src.bot.callbacks import WorkoutsSelectCallback, WorkoutsPaginationCallback
+from src.bot.callbacks import (
+    WorkoutsSelectCallback,
+    WorkoutsPaginationCallback,
+    DisabledCallback,
+)
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.collections import chunk_list
 from src.services.exceptions import NoWorkoutsError
@@ -28,29 +32,35 @@ async def get_workouts_keyboard(
         for workout in paginated_workouts.results
     ]
 
-    pagination_btns = []
-
-    if paginated_workouts.has_previous:
-        pagination_btns.append(
-            InlineKeyboardButton(
-                text="⬅️ Предыдущая",
-                callback_data=WorkoutsPaginationCallback(
+    pagination_btns = [
+        InlineKeyboardButton(
+            text="⬅️ Назад" if paginated_workouts.has_previous else "🔒 Назад",
+            callback_data=(
+                WorkoutsPaginationCallback(
                     offset=paginated_workouts.previous_offset,
-                ).pack(),
-            )
-        )
-
-    if paginated_workouts.has_next:
-        pagination_btns.append(
-            InlineKeyboardButton(
-                text="Следующая ➡️",
-                callback_data=WorkoutsPaginationCallback(
+                ).pack()
+                if paginated_workouts.has_previous
+                else DisabledCallback().pack()
+            ),
+        ),
+        InlineKeyboardButton(
+            text="Вперёд ➡️" if paginated_workouts.has_next else "🔒 Вперёд",
+            callback_data=(
+                WorkoutsPaginationCallback(
                     offset=paginated_workouts.next_offset,
-                ).pack(),
-            )
-        )
+                ).pack()
+                if paginated_workouts.has_next
+                else DisabledCallback().pack()
+            ),
+        ),
+    ]
+
+    final_btns = [
+        *chunk_list(workouts_btns, buttons_per_row),
+        pagination_btns,
+    ]
 
     return InlineKeyboardMarkup(
         row_width=1,
-        inline_keyboard=[*chunk_list(workouts_btns, buttons_per_row), pagination_btns],
+        inline_keyboard=final_btns,
     )

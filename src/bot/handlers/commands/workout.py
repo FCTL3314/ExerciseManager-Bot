@@ -7,6 +7,8 @@ from src.bot.keyboards.inline.workouts import get_workouts_keyboard
 from src.bot.message_templates import (
     INVALID_WORKOUT_NAME_TEMPLATE,
     INVALID_EXERCISE_NAME_TEMPLATE,
+    NO_WORKOUTS_MESSAGE,
+    SELECT_WORKOUT_MESSAGE,
 )
 from src.bot.services.shortcuts.commands import (
     ADD_WORKOUT_COMMAND,
@@ -93,16 +95,11 @@ async def command_add_exercise_handler(
             buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
         )
     except NoWorkoutsError:
-        await message.answer(
-            f"❌ У вас пока нет созданных тренировок. Пожалуйста, создайте тренировку перед добавлением упражнений, используя команду {html.bold(ADD_WORKOUT_COMMAND)}."
-        )
+        await message.answer(NO_WORKOUTS_MESSAGE)
         return
 
     await state.set_state(ExerciseAddingStates.waiting_for_workout_selection)
-    await message.answer(
-        "📋 Выберите тренировку, к которой хотите добавить упражнение:",
-        reply_markup=keyboard,
-    )
+    await message.answer(SELECT_WORKOUT_MESSAGE, reply_markup=keyboard)
 
 
 @router.message(ExerciseAddingStates.waiting_for_name_input)
