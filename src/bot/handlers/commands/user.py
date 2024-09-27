@@ -11,7 +11,8 @@ from src.bot.services.shortcuts.commands import (
     REGISTER_COMMAND,
     LOGIN_COMMAND,
     HELP_COMMAND,
-    ME_COMMAND, CANCEL_COMMAND,
+    ME_COMMAND,
+    CANCEL_COMMAND,
 )
 from src.bot.states.user import RegistrationStates, LoginStates
 from src.config import Settings
