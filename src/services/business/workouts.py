@@ -1,8 +1,15 @@
-from typing import runtime_checkable, Protocol
+import base64
+import pickle
+from typing import runtime_checkable, Protocol, Any
 
 from src.config.types import ExerciseValidationSettings
 from src.database import KeyValueRepositoryProto
-from src.models.workout import Workout, WorkoutPaginatedResponse, WorkoutSettings
+from src.models.workout import (
+    Workout,
+    WorkoutPaginatedResponse,
+    WorkoutSettings,
+    WorkoutState,
+)
 from src.services.api.exercises import ExerciseAPIClientProto
 from src.services.api.workouts import WorkoutAPIClientProto
 from src.services.business import BaseService, AuthServiceProto, BaseServiceProto
@@ -40,6 +47,8 @@ class WorkoutServiceProto(BaseServiceProto, Protocol):
     ) -> Workout: ...
 
     async def get_workout_settings(self) -> WorkoutSettings: ...
+
+    async def get_current_workout_state(self, data: dict[str, Any]) -> WorkoutState: ...
 
 
 class DefaultWorkoutService(BaseService):
@@ -113,12 +122,26 @@ class DefaultWorkoutService(BaseService):
 
     async def get_workout_settings(self) -> WorkoutSettings:
         try:
-            pre_start_timer_seconds = int(await self._storage.get("pre_start_timer_seconds"))
+            pre_start_timer_seconds = int(
+                await self._storage.get("pre_start_timer_seconds")
+            )
         except TypeError:
             pre_start_timer_seconds = 15  # TODO:  Remove hardcode
-        manual_mode_enabled = True # await self._storage.get("manual_mode_enabled") == "1"   # TODO: Uncomment
+        manual_mode_enabled = True  # await self._storage.get("manual_mode_enabled") == "1"   # TODO: Uncomment
 
         return WorkoutSettings(
             pre_start_timer_seconds=pre_start_timer_seconds,
             manual_mode_enabled=manual_mode_enabled,
+        )
+
+    @staticmethod
+    async def get_current_workout_state(data: dict[str, Any]) -> WorkoutState:
+        current_workout_exercise_index = data.get("current_workout_exercise_index", 0)
+        workout_exercises = pickle.loads(base64.b64decode(data["workout_exercises"]))
+        current_workout_exercise = workout_exercises[current_workout_exercise_index]
+        print(current_workout_exercise)
+
+        return WorkoutState(
+            workout_exercises=workout_exercises,
+            current_workout_exercise=current_workout_exercise,
         )

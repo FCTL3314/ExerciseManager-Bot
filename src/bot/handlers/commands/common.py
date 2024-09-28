@@ -1,5 +1,5 @@
 from aiogram import html
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -23,5 +23,5 @@ async def command_start_handler(message: Message) -> None:
 async def command_cancel_handler(message: Message, state: FSMContext) -> None:
     await state.clear()
     await message.answer(
-        "🚫 Операция отменена. Если хотите начать заново, введите соответствующую команду."
+        "✅ Отменено. Если хотите начать заново, введите соответствующую команду."
     )

@@ -23,7 +23,6 @@ from src.bot.services.shortcuts.message_templates import (
 from src.bot.services.workout import send_select_workout_keyboard_or_error_message
 from src.bot.states.workout import ExerciseAddingStates, StartWorkoutStates
 from src.config import Settings
-from src.models.workout import WorkoutExercise
 from src.services.business.workouts import WorkoutServiceProto
 
 
@@ -104,18 +103,11 @@ async def process_workout_exercise(
     workout_service: WorkoutServiceProto,
 ) -> None:
     await callback_query.answer()
-
     data = await state.get_data()
 
     workout_settings = await workout_service.get_workout_settings()
-    # Start: Get current exercise from state
-    current_workout_exercise_index = data.get("current_workout_exercise_index", 0)
-    workout_exercises = pickle.loads(base64.b64decode(data["workout_exercises"]))
-
-    workout_exercise: WorkoutExercise = workout_exercises[
-        current_workout_exercise_index
-    ]
-    # End
+    workout_state = await workout_service.get_current_workout_state(data)
+    workout_exercise = workout_state.current_workout_exercise
 
     if workout_exercise.exercise.image:
         await callback_query.message.answer_photo(
@@ -132,7 +124,7 @@ async def process_workout_exercise(
     # Start: Generate break seconds
     break_seconds = (
         workout_settings.pre_start_timer_seconds
-        if current_workout_exercise_index == 0
+        if workout_state.is_first_exercise
         else int(workout_exercise.break_time.total_seconds())
     )
     # End
@@ -167,14 +159,14 @@ async def process_workout_exercise(
     )
 
     # Start: Is workout finished | Is no more exercises
-    if current_workout_exercise_index + 1 >= len(workout_exercises):
+    if workout_state.no_more_exercises:
         await state.clear()
         await callback_query.message.answer("🎉 Тренировка закончена, ты молодец!")
         return
     # End
 
     await state.update_data(
-        current_workout_exercise_index=current_workout_exercise_index + 1
+        current_workout_exercise_index=workout_state.next_exercise_index
     )
 
     if workout_settings.manual_mode_enabled:

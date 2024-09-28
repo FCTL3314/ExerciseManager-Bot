@@ -74,7 +74,23 @@ class WorkoutExerciseRead(BaseModel):
 class WorkoutPaginatedResponse(PaginatedResponse[Workout]): ...
 
 
-
 class WorkoutSettings(BaseModel):
     pre_start_timer_seconds: int
     manual_mode_enabled: bool
+
+
+class WorkoutState(BaseModel):
+    workout_exercises: list[WorkoutExerciseRead]
+    current_workout_exercise: WorkoutExerciseRead
+
+    @property
+    def is_first_exercise(self) -> bool:
+        return self.current_exercise_index == 0
+
+    @property
+    def next_exercise_index(self) -> int:
+        return self.current_exercise_index + 1
+
+    @property
+    def no_more_exercises(self) -> bool:
+        return self.next_exercise_index >= len(self.workout_exercises)
