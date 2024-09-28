@@ -144,6 +144,8 @@ async def process_workout_exercise(
     )
 
     for i, seconds in enumerate(range(break_seconds, -1, -1)):
+        if await state.get_state() != StartWorkoutStates.doing_workout:
+            return
         if i == 0:
             timer_message = await callback_query.message.answer(
                 break_timer_message_template.format(seconds_left=html.bold(seconds))
@@ -157,6 +159,8 @@ async def process_workout_exercise(
     for seconds in range(
         int(workout_exercise.exercise.duration.total_seconds()), -1, -1
     ):
+        if await state.get_state() != StartWorkoutStates.doing_workout:
+            return
         await timer_message.edit_text(
             exercise_timer_message_template.format(seconds_left=html.bold(seconds))
         )
