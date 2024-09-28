@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from babel.dates import format_timedelta
 from pydantic import BaseModel
 
 from src.models import PaginatedResponse, create_timedelta_from_nanoseconds_validator
@@ -26,6 +27,9 @@ class Workout(BaseModel):
             timedelta(),
         )
 
+    def get_humanized_exercises_duration(self, locale: str) -> str:
+        return format_timedelta(self.exercises_duration, locale=locale)
+
     @property
     def workout_duration(self) -> timedelta:
         return (
@@ -35,6 +39,9 @@ class Workout(BaseModel):
             )
             + self.exercises_duration
         )
+
+    def get_humanized_workout_duration(self, locale: str) -> str:
+        return format_timedelta(self.workout_duration, locale=locale)
 
     @property
     def exercises_count(self) -> int:

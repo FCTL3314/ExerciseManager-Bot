@@ -5,6 +5,7 @@ import pickle
 from aiogram import html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
+from aiogram.utils.i18n import I18n
 
 from src.bot.callbacks import (
     WorkoutsSelectCallback,
@@ -86,20 +87,13 @@ async def process_start_workout_selection(
         pickle.dumps(workout.workout_exercises)
     ).decode("utf-8")
 
-    await state.update_data(
-        current_workout_exercise_index=0,
-        workout_exercises=serialized_workout_exercises,
-    )
+    await state.update_data(workout_exercises=serialized_workout_exercises)
     await state.set_state(StartWorkoutStates.doing_workout)
-
-    for workout_exercise in workout.workout_exercises:
-        print(workout_exercise.exercise.duration)
-        print(workout_exercise.break_time)
 
     await callback_query.message.edit_text(
         f"💪 Вы выбрали тренировку: {html.bold(workout.name)}!\n\n"
-        f"🔹 Тренировка состоит из {workout.exercises_count} упражнений!\n"
-        f"🔹 Приблизительное время тренировки - {round(workout.workout_duration.seconds / 60, 1)} минут!",
+        f"🔹 Тренировка состоит из {workout.exercises_count} упражнений.\n"
+        f"🔹 Приблизительное время тренировки - {workout.get_humanized_workout_duration("ru")}.", # TODO: Change to i18n.current_locale
         reply_markup=keyboard,
     )
 
@@ -113,7 +107,7 @@ async def process_workout_exercise(
     data = await state.get_data()
 
     # Start: Get current exercise from state
-    current_workout_exercise_index = data["current_workout_exercise_index"]
+    current_workout_exercise_index = data.get("current_workout_exercise_index", 0)
     workout_exercises = pickle.loads(base64.b64decode(data["workout_exercises"]))
 
     workout_exercise: WorkoutExercise = workout_exercises[
