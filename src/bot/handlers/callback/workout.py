@@ -108,20 +108,20 @@ async def process_workout_exercise(
     break_seconds = await workout_service.get_break_seconds(
         workout_state, workout_settings
     )
-
     workout_exercise = workout_state.current_workout_exercise
+
+    exercise_text = (
+        f"{html.bold(workout_exercise.exercise.name)}\n"
+        f"{workout_exercise.exercise.description}\n"
+    )
 
     if workout_exercise.exercise.image:
         await callback_query.message.answer_photo(
             photo=workout_exercise.exercise.image,
-            caption=f"{html.bold(workout_exercise.exercise.name)}\n"
-            f"{workout_exercise.exercise.description}\n",
+            caption=exercise_text,
         )
     else:
-        await callback_query.message.answer(
-            f"{html.bold(workout_exercise.exercise.name)}\n"
-            f"{workout_exercise.exercise.description}\n",
-        )
+        await callback_query.message.answer(exercise_text)
 
     async def get_on_tick(
         message_template: str,
@@ -160,12 +160,10 @@ async def process_workout_exercise(
         f"✅ Упражнение {html.bold(workout_exercise.exercise.name)} выполнено!"
     )
 
-    # Start: Is workout finished | Is no more exercises
     if workout_state.no_more_exercises:
         await state.clear()
         await callback_query.message.answer("🎉 Тренировка закончена, ты молодец!")
         return
-    # End
 
     await state.update_data(
         current_workout_exercise_index=workout_state.next_exercise_index
