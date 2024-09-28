@@ -115,7 +115,7 @@ class DefaultWorkoutService(BaseService):
         try:
             pre_start_timer_seconds = int(await self._storage.get("pre_start_timer_seconds"))
         except TypeError:
-            pre_start_timer_seconds = 15
+            pre_start_timer_seconds = 15  # TODO:  Remove hardcode
         manual_mode_enabled = True # await self._storage.get("manual_mode_enabled") == "1"   # TODO: Uncomment
 
         return WorkoutSettings(
