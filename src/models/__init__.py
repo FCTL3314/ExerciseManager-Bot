@@ -55,9 +55,6 @@ def create_timedelta_from_nanoseconds_validator(
     def parse_timedelta_from_nanoseconds(
         cls: Type[Any], value: Any, info: FieldValidationInfo  # noqa
     ) -> Any:
-        if not isinstance(value, (int, float, str)):
-            return value
-
         try:
             return from_nanoseconds(int(value))
         except ValueError:

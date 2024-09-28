@@ -67,11 +67,11 @@ async def get_select_workout_keyboard(
     )
 
 
-async def get_start_workout_keyboard() -> InlineKeyboardMarkup:
+async def get_start_workout_keyboard(text: str = "🚀 Начать тренировку") -> InlineKeyboardMarkup:
     btns = [
         [
             InlineKeyboardButton(
-                text="🚀 Начать тренировку",
+                text=text,
                 callback_data=StartWorkoutCallback().pack(),
             )
         ]
