@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from src.bot.handlers.commands import router
-from src.bot.message_templates import (
+from src.bot.services.shortcuts.message_templates import (
     INVALID_USERNAME_MESSAGE,
     INVALID_PASSWORD_MESSAGE,
 )

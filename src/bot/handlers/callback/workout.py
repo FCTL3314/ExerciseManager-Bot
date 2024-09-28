@@ -14,9 +14,11 @@ from src.bot.callbacks import (
 from src.bot.enums import MessageAction
 from src.bot.handlers.callback import router
 from src.bot.keyboards.inline.workouts import get_start_workout_keyboard
-from src.bot.message_templates import (
+from src.bot.services.shortcuts.message_templates import (
     ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
     ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
+    REST_PERIOD_TIMER_MESSAGE,
+    WORKOUT_EXERCISE_TIMER_MESSAGE,
 )
 from src.bot.services.workout import send_select_workout_keyboard_or_error_message
 from src.bot.states.workout import ExerciseAddingStates, StartWorkoutStates
@@ -110,12 +112,14 @@ async def process_workout_exercise(
 
     data = await state.get_data()
 
+    # Start: Get current exercise from state
     current_workout_exercise_index = data["current_workout_exercise_index"]
     workout_exercises = pickle.loads(base64.b64decode(data["workout_exercises"]))
 
     workout_exercise: WorkoutExercise = workout_exercises[
         current_workout_exercise_index
     ]
+    # End
 
     if workout_exercise.exercise.image:
         await callback_query.message.answer_photo(
@@ -128,31 +132,31 @@ async def process_workout_exercise(
             f"{html.bold(workout_exercise.exercise.name)}\n"
             f"{workout_exercise.exercise.description}\n",
         )
-    break_timer_message_template = "⌛️ Отдыхайте ещё {seconds_left} секунд..."
-    exercise_timer_message_template = (
-        "⌛️ Выполняйте упражнение ещё {seconds_left} секунд..."
-    )
 
-    # TODO: Move constants to the settings
+    # Start: Setting constants
     WORKOUT_PRE_START_TIMER_SECONDS = 15
     IS_MANUAL_MODE_ENABLED = True
+    # End
 
+    # Start: Generate break seconds
     break_seconds = (
         WORKOUT_PRE_START_TIMER_SECONDS
         if current_workout_exercise_index == 0
         else int(workout_exercise.break_time.total_seconds())
     )
+    # End
 
+    # Start: Start timer message
     for i, seconds in enumerate(range(break_seconds, -1, -1)):
         if await state.get_state() != StartWorkoutStates.doing_workout:
             return
         if i == 0:
             timer_message = await callback_query.message.answer(
-                break_timer_message_template.format(seconds_left=html.bold(seconds))
+                REST_PERIOD_TIMER_MESSAGE.format(seconds_left=html.bold(seconds))
             )
             continue
         await timer_message.edit_text(  # noqa
-            break_timer_message_template.format(seconds_left=html.bold(seconds))
+            REST_PERIOD_TIMER_MESSAGE.format(seconds_left=html.bold(seconds))
         )
         await asyncio.sleep(1)
 
@@ -162,18 +166,21 @@ async def process_workout_exercise(
         if await state.get_state() != StartWorkoutStates.doing_workout:
             return
         await timer_message.edit_text(
-            exercise_timer_message_template.format(seconds_left=html.bold(seconds))
+            WORKOUT_EXERCISE_TIMER_MESSAGE.format(seconds_left=html.bold(seconds))
         )
         await asyncio.sleep(1)
+    # End
 
     await timer_message.edit_text(
         f"✅ Упражнение {html.bold(workout_exercise.exercise.name)} выполнено!"
     )
 
+    # Start: Is workout finished | Is no more exercises
     if current_workout_exercise_index + 1 >= len(workout_exercises):
         await state.clear()
         await callback_query.message.answer("🎉 Тренировка закончена, ты молодец!")
         return
+    # End
 
     await state.update_data(
         current_workout_exercise_index=current_workout_exercise_index + 1

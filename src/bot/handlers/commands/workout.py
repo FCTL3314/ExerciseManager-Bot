@@ -3,7 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from src.bot.handlers.commands import router
-from src.bot.message_templates import (
+from src.bot.services.shortcuts.message_templates import (
     INVALID_WORKOUT_NAME_MESSAGE,
     INVALID_EXERCISE_NAME_MESSAGE,
     ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
