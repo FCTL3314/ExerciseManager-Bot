@@ -5,6 +5,7 @@ from src.bot.callbacks import (
     WorkoutsPaginationCallback,
     DisabledCallback,
     NextExerciseCallback,
+    StartWorkoutCallback,
 )
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.collections import chunk_list
@@ -67,11 +68,33 @@ async def get_select_workout_keyboard(
     )
 
 
-async def get_next_exercise_keyboard(text: str) -> InlineKeyboardMarkup:
+async def get_start_workout_keyboard() -> InlineKeyboardMarkup:
     btns = [
         [
             InlineKeyboardButton(
-                text=text,
+                text="🚀 Начать тренировку",
+                callback_data=StartWorkoutCallback(manual_mode_enabled=False).pack(),
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="🚀 Начать тренировку в ручном режиме",
+                callback_data=StartWorkoutCallback(manual_mode_enabled=True).pack(),
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(
+        row_width=1,
+        inline_keyboard=btns,
+    )
+
+
+async def get_next_exercise_keyboard() -> InlineKeyboardMarkup:
+    btns = [
+        [
+            InlineKeyboardButton(
+                text="➡️ Перейти к следующему упражнению",
                 callback_data=NextExerciseCallback().pack(),
             )
         ]

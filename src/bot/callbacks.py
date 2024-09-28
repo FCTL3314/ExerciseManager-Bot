@@ -11,5 +11,7 @@ class WorkoutsSelectCallback(CallbackData, prefix="selected_workout"):
 class WorkoutsPaginationCallback(CallbackData, prefix="workout_pagination"):
     offset: int
 
+class StartWorkoutCallback(CallbackData, prefix="start_workout"):
+    manual_mode_enabled: bool
 
 class NextExerciseCallback(CallbackData, prefix="next_exercise"): ...

@@ -1,7 +1,9 @@
 from aiogram.types import Message
 
 from src.bot.enums import MessageAction
-from src.bot.keyboards.inline.workouts import get_select_workout_keyboard
+from src.bot.keyboards.inline.workouts import (
+    get_select_workout_keyboard,
+)
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.exceptions import NoWorkoutsError
 

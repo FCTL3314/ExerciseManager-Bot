@@ -22,5 +22,10 @@ ADD_EXERCISE_NO_WORKOUTS_MESSAGE = f"{_BASE_NOT_WORKOUTS_MESSAGE} Пожалуй
 START_WORKOUT_NO_WORKOUTS_MESSAGE = f"{_BASE_NOT_WORKOUTS_MESSAGE} Пожалуйста, создайте тренировку, которую вы хотите начать, используя команду {html.bold(ADD_WORKOUT_COMMAND)}."
 
 # Exercises
-REST_PERIOD_TIMER_MESSAGE = "⏳ Отдыхайте, осталось {seconds_left} секунд..."
-WORKOUT_EXERCISE_TIMER_MESSAGE = "⏳ Выполняйте упражнение, осталось {seconds_left} секунд..."
+EXERCISE_DESCRIPTION_MESSAGE = (
+    "<b>🏋️ Упражнение:</b> {name}\n"
+    "<b>📄 Описание:</b> {description}\n"
+    "<b>⏱️ Продолжительность:</b> {duration} секунд\n"
+)
+REST_PERIOD_TIMER_MESSAGE = "💤 Отдыхайте, осталось {seconds_left} секунд..."
+WORKOUT_EXERCISE_TIMER_MESSAGE = "🔥 Выполняйте упражнение, осталось {seconds_left} секунд..."

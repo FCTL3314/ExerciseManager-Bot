@@ -1,7 +1,6 @@
-import asyncio
 import base64
 import pickle
-from typing import runtime_checkable, Protocol, Any, Callable, Awaitable
+from typing import runtime_checkable, Protocol, Any
 
 from src.config.types import ExerciseValidationSettings
 from src.database import KeyValueRepositoryProto
@@ -48,7 +47,7 @@ class WorkoutServiceProto(BaseServiceProto, Protocol):
         break_time: str,
     ) -> Workout: ...
 
-    async def get_workout_settings(self) -> WorkoutSettings: ...
+    async def get_workout_settings(self, data: dict[str, Any]) -> WorkoutSettings: ...
 
     async def create_serialized_workout_state(
         self, workout: Workout
@@ -130,14 +129,14 @@ class DefaultWorkoutService(BaseService):
             access_token, workout_id, exercise.id, await ato_nanoseconds(_break_time)
         )
 
-    async def get_workout_settings(self) -> WorkoutSettings:
+    async def get_workout_settings(self, data: dict[str, Any]) -> WorkoutSettings:
         try:
             pre_start_timer_seconds = int(
                 await self._storage.get("pre_start_timer_seconds")
             )
         except TypeError:
             pre_start_timer_seconds = 15  # TODO:  Remove hardcode
-        manual_mode_enabled = True  # await self._storage.get("manual_mode_enabled") == "1"   # TODO: Uncomment
+        manual_mode_enabled = data.get("manual_mode_enabled", False)
 
         return WorkoutSettings(
             pre_start_timer_seconds=pre_start_timer_seconds,

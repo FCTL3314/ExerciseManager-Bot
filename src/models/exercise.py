@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from babel.dates import format_timedelta
 from pydantic import BaseModel
 
 from src.models import (
@@ -27,3 +28,6 @@ class ExerciseRead(BaseModel):
     image: str | None
 
     _duration_from_nanoseconds = create_timedelta_from_nanoseconds_validator("duration")
+
+    def get_humanized_duration(self, locale: str) -> str:
+        return format_timedelta(self.duration, locale=locale)
