@@ -79,9 +79,18 @@ class WorkoutSettings(BaseModel):
     manual_mode_enabled: bool
 
 
+class SerializedWorkoutState(BaseModel):
+    workout_exercises: str
+    current_workout_exercise_index: int
+
+
 class WorkoutState(BaseModel):
     workout_exercises: list[WorkoutExerciseRead]
     current_workout_exercise: WorkoutExerciseRead
+
+    @property
+    def current_exercise_index(self) -> int:
+        return self.workout_exercises.index(self.current_workout_exercise)
 
     @property
     def is_first_exercise(self) -> bool:

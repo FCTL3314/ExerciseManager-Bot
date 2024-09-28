@@ -1,6 +1,4 @@
 import asyncio
-import base64
-import pickle
 
 from aiogram import html
 from aiogram.fsm.context import FSMContext
@@ -81,11 +79,9 @@ async def process_start_workout_selection(
     workout = await workout_service.retrieve(workout_id=callback_data.workout_id)
     keyboard = await get_next_exercise_keyboard(text="🚀 Начать тренировку")
 
-    serialized_workout_exercises = base64.b64encode(
-        pickle.dumps(workout.workout_exercises)
-    ).decode("utf-8")
+    workout_state = await workout_service.create_serialized_workout_state(workout)
 
-    await state.update_data(workout_exercises=serialized_workout_exercises)
+    await state.update_data(**workout_state.model_dump())
     await state.set_state(StartWorkoutStates.doing_workout)
 
     await callback_query.message.edit_text(

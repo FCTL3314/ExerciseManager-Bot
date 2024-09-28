@@ -8,7 +8,7 @@ from src.models.workout import (
     Workout,
     WorkoutPaginatedResponse,
     WorkoutSettings,
-    WorkoutState,
+    WorkoutState, SerializedWorkoutState,
 )
 from src.services.api.exercises import ExerciseAPIClientProto
 from src.services.api.workouts import WorkoutAPIClientProto
@@ -47,6 +47,8 @@ class WorkoutServiceProto(BaseServiceProto, Protocol):
     ) -> Workout: ...
 
     async def get_workout_settings(self) -> WorkoutSettings: ...
+
+    async def create_serialized_workout_state(self, workout: Workout) -> SerializedWorkoutState: ...
 
     async def get_current_workout_state(self, data: dict[str, Any]) -> WorkoutState: ...
 
@@ -135,11 +137,21 @@ class DefaultWorkoutService(BaseService):
         )
 
     @staticmethod
+    async def create_serialized_workout_state(workout: Workout) -> SerializedWorkoutState:
+        serialized_workout_exercises = base64.b64encode(
+            pickle.dumps(workout.workout_exercises)
+        ).decode("utf-8")
+
+        return SerializedWorkoutState(
+            workout_exercises=serialized_workout_exercises,
+            current_workout_exercise_index=0,
+        )
+
+    @staticmethod
     async def get_current_workout_state(data: dict[str, Any]) -> WorkoutState:
         current_workout_exercise_index = data.get("current_workout_exercise_index", 0)
         workout_exercises = pickle.loads(base64.b64decode(data["workout_exercises"]))
         current_workout_exercise = workout_exercises[current_workout_exercise_index]
-        print(current_workout_exercise)
 
         return WorkoutState(
             workout_exercises=workout_exercises,
