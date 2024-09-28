@@ -5,7 +5,6 @@ import pickle
 from aiogram import html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
-from aiogram.utils.i18n import I18n
 
 from src.bot.callbacks import (
     WorkoutsSelectCallback,
@@ -93,19 +92,22 @@ async def process_start_workout_selection(
     await callback_query.message.edit_text(
         f"💪 Вы выбрали тренировку: {html.bold(workout.name)}!\n\n"
         f"🔹 Тренировка состоит из {workout.exercises_count} упражнений.\n"
-        f"🔹 Приблизительное время тренировки - {workout.get_humanized_workout_duration("ru")}.", # TODO: Change to i18n.current_locale
+        f"🔹 Приблизительное время тренировки - {workout.get_humanized_workout_duration("ru")}.",  # TODO: Change to i18n.current_locale
         reply_markup=keyboard,
     )
 
 
 @router.callback_query(StartWorkoutStates.doing_workout, NextExerciseCallback.filter())
 async def process_workout_exercise(
-    callback_query: CallbackQuery, state: FSMContext
+    callback_query: CallbackQuery,
+    state: FSMContext,
+    workout_service: WorkoutServiceProto,
 ) -> None:
     await callback_query.answer()
 
     data = await state.get_data()
 
+    workout_settings = await workout_service.get_workout_settings()
     # Start: Get current exercise from state
     current_workout_exercise_index = data.get("current_workout_exercise_index", 0)
     workout_exercises = pickle.loads(base64.b64decode(data["workout_exercises"]))
@@ -127,14 +129,9 @@ async def process_workout_exercise(
             f"{workout_exercise.exercise.description}\n",
         )
 
-    # Start: Setting constants
-    WORKOUT_PRE_START_TIMER_SECONDS = 15
-    IS_MANUAL_MODE_ENABLED = True
-    # End
-
     # Start: Generate break seconds
     break_seconds = (
-        WORKOUT_PRE_START_TIMER_SECONDS
+        workout_settings.pre_start_timer_seconds
         if current_workout_exercise_index == 0
         else int(workout_exercise.break_time.total_seconds())
     )
@@ -180,10 +177,11 @@ async def process_workout_exercise(
         current_workout_exercise_index=current_workout_exercise_index + 1
     )
 
-    if IS_MANUAL_MODE_ENABLED:
+    if workout_settings.manual_mode_enabled:
         keyboard = await get_next_exercise_keyboard(
             text="➡️ Перейти к следующему упражнению"
         )
         await timer_message.edit_reply_markup(reply_markup=keyboard)
-    else:
-        await process_workout_exercise(callback_query, state)
+        return
+
+    await process_workout_exercise(callback_query, state)

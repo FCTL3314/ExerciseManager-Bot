@@ -72,3 +72,9 @@ class WorkoutExerciseRead(BaseModel):
 
 
 class WorkoutPaginatedResponse(PaginatedResponse[Workout]): ...
+
+
+
+class WorkoutSettings(BaseModel):
+    pre_start_timer_seconds: int
+    manual_mode_enabled: bool

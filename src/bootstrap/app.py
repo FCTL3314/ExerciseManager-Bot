@@ -116,6 +116,7 @@ class Bootstrap:
             workout_api_client,
             exercise_api_client,
             token_manager,
+            storage,
             config.settings.validation.exercise,
         )
         exercise_service = DefaultExerciseService(

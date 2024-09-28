@@ -1,7 +1,8 @@
 from typing import runtime_checkable, Protocol
 
 from src.config.types import ExerciseValidationSettings
-from src.models.workout import Workout, WorkoutPaginatedResponse
+from src.database import KeyValueRepositoryProto
+from src.models.workout import Workout, WorkoutPaginatedResponse, WorkoutSettings
 from src.services.api.exercises import ExerciseAPIClientProto
 from src.services.api.workouts import WorkoutAPIClientProto
 from src.services.business import BaseService, AuthServiceProto, BaseServiceProto
@@ -38,6 +39,8 @@ class WorkoutServiceProto(BaseServiceProto, Protocol):
         break_time: str,
     ) -> Workout: ...
 
+    async def get_workout_settings(self) -> WorkoutSettings: ...
+
 
 class DefaultWorkoutService(BaseService):
     def __init__(
@@ -46,12 +49,14 @@ class DefaultWorkoutService(BaseService):
         workout_api_client: WorkoutAPIClientProto,
         exercise_api_client: ExerciseAPIClientProto,
         token_manager: TokenManagerProto,
+        storage: KeyValueRepositoryProto,
         validation_settings: ExerciseValidationSettings,
     ) -> None:
         super().__init__(auth_service)
         self._workout_api_client = workout_api_client
         self._exercise_api_client = exercise_api_client
         self._token_manager = token_manager
+        self._storage = storage
         self._validation_settings = validation_settings
 
     async def retrieve(self, workout_id: str | int) -> Workout:
@@ -104,4 +109,13 @@ class DefaultWorkoutService(BaseService):
         )
         return await self._workout_api_client.add_exercise(
             access_token, workout_id, exercise.id, await ato_nanoseconds(_break_time)
+        )
+
+    async def get_workout_settings(self) -> WorkoutSettings:
+        pre_start_timer_seconds = int(await self._storage.get("pre_start_timer_seconds")) or 15  # TODO: Remove or
+        manual_mode_enabled = True # await self._storage.get("manual_mode_enabled") == "1"   # TODO: Uncomment
+
+        return WorkoutSettings(
+            pre_start_timer_seconds=pre_start_timer_seconds,
+            manual_mode_enabled=manual_mode_enabled,
         )
