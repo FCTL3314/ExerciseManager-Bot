@@ -112,7 +112,10 @@ class DefaultWorkoutService(BaseService):
         )
 
     async def get_workout_settings(self) -> WorkoutSettings:
-        pre_start_timer_seconds = int(await self._storage.get("pre_start_timer_seconds")) or 15  # TODO: Remove or
+        try:
+            pre_start_timer_seconds = int(await self._storage.get("pre_start_timer_seconds"))
+        except TypeError:
+            pre_start_timer_seconds = 15
         manual_mode_enabled = True # await self._storage.get("manual_mode_enabled") == "1"   # TODO: Uncomment
 
         return WorkoutSettings(
