@@ -64,6 +64,18 @@ class BotLoader(IBotLoader):
         dp.startup.register(on_startup)
         dp.shutdown.register(on_shutdown)
 
+    async def _setup_webhook(self, bot: ABot) -> None:
+        existed_webhook = await bot.get_webhook_info()
+        current_webhook_url = self._config.env.bot.build_webhook_url_with_token(
+            self._config.env.bot.token
+        )
+
+        if existed_webhook.url != current_webhook_url:
+            await bot.set_webhook(
+                current_webhook_url,
+                secret_token=self._config.env.bot.webhook_secret,
+            )
+
     async def load(self) -> Bot:
         bot = await self._create_bot()
         storage = await self._create_storage()
@@ -71,6 +83,7 @@ class BotLoader(IBotLoader):
 
         await self._register_lifecycle(dp)
         await self._init_middlewares(dp)
+        await self._setup_webhook(bot)
 
         return Bot(
             client=bot,

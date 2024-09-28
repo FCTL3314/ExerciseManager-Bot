@@ -11,6 +11,9 @@ class EnvironmentConfigLoader(EnvironmentConfigLoaderProto):
     async def _load_bot_config(self) -> BotConfig:
         return BotConfig(
             token=self._config("BOT_TOKEN"),
+            webhook_host=self._config("WEBHOOK_HOST"),
+            webhook_path=self._config("WEBHOOK_PATH"),
+            webhook_secret=self._config("WEBHOOK_SECRET"),
         )
 
     async def _load_api_config(self) -> APIConfig:

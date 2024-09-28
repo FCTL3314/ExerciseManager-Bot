@@ -10,6 +10,7 @@ from src.config.types import (
     ExerciseValidationSettings,
     PaginationSettings,
     WorkoutPaginationSettings,
+    ServerSettings,
 )
 from src.services.duration import afrom_nanoseconds
 
@@ -73,15 +74,22 @@ class SettingsLoader(SettingsLoaderProto):
             domain=self._config("LOCALIZATION_DOMAIN"),
         )
 
+    async def _load_server(self) -> ServerSettings:
+        return ServerSettings(
+            telegram_secret_token_header=self._config("TELEGRAM_SECRET_TOKEN_HEADER"),
+        )
+
     async def load(self) -> Settings:
         logging = await self._load_logging()
         validation = await self._load_validation()
         pagination = await self._load_pagination()
         localization = await self._load_localization()
+        server = await self._load_server()
 
         return Settings(
             logging=logging,
             validation=validation,
             pagination=pagination,
             localization=localization,
+            server=server,
         )

@@ -1,10 +1,21 @@
 from dataclasses import dataclass
 from datetime import timedelta
+from urllib.parse import urljoin
 
 
 @dataclass(frozen=True)
 class BotConfig:
     token: str
+    webhook_host: str
+    webhook_path: str
+    webhook_secret: str
+
+    @property
+    def webhook_url(self) -> str:
+        return urljoin(self.webhook_host, self.webhook_path)
+
+    def build_webhook_url_with_token(self, token: str) -> str:
+        return self.webhook_url.format(token=token)
 
 
 @dataclass(frozen=True)
@@ -83,11 +94,17 @@ class PaginationSettings:
 
 
 @dataclass(frozen=True)
+class ServerSettings:
+    telegram_secret_token_header: str
+
+
+@dataclass(frozen=True)
 class Settings:
     logging: LoggingSettings
     validation: ValidationSettings
-    pagination: PaginationSettings
     localization: LocalizationSettings
+    pagination: PaginationSettings
+    server: ServerSettings
 
 
 @dataclass(frozen=True)

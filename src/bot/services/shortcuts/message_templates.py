@@ -17,10 +17,22 @@ START_MESSAGE = (
 )
 
 # Validation
-INVALID_USERNAME_MESSAGE = f"❌ Имя пользователя должно быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. Пожалуйста, попробуйте снова:"
-INVALID_PASSWORD_MESSAGE = f"❌ Пароль должен быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. Пожалуйста, попробуйте снова:"
-INVALID_WORKOUT_NAME_MESSAGE = f"❌ Название тренировки должно быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. Пожалуйста, попробуйте снова:"
-INVALID_EXERCISE_NAME_MESSAGE = f"❌ Название упражнения должно быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. Пожалуйста, попробуйте снова:"
+INVALID_USERNAME_MESSAGE = (
+    f"❌ Имя пользователя должно быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. "
+    f"Пожалуйста, попробуйте снова:"
+)
+INVALID_PASSWORD_MESSAGE = (
+    f"❌ Пароль должен быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. "
+    f"Пожалуйста, попробуйте снова:"
+)
+INVALID_WORKOUT_NAME_MESSAGE = (
+    f"❌ Название тренировки должно быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. "
+    f"Пожалуйста, попробуйте снова:"
+)
+INVALID_EXERCISE_NAME_MESSAGE = (
+    f"❌ Название упражнения должно быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. "
+    f"Пожалуйста, попробуйте снова:"
+)
 
 # User action requests
 ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE = (
@@ -32,10 +44,16 @@ START_WORKOUT_WORKOUT_SELECTION_MESSAGE = (
 
 # State notifications
 _BASE_NOT_WORKOUTS_MESSAGE = "❌ У вас пока нет созданных тренировок."
-ADD_EXERCISE_NO_WORKOUTS_MESSAGE = f"{_BASE_NOT_WORKOUTS_MESSAGE} Пожалуйста, создайте тренировку перед добавлением упражнений с помощью команды {html.bold(ADD_WORKOUT_COMMAND)}."
-START_WORKOUT_NO_WORKOUTS_MESSAGE = f"{_BASE_NOT_WORKOUTS_MESSAGE} Пожалуйста, создайте тренировку, которую вы хотите начать, используя команду {html.bold(ADD_WORKOUT_COMMAND)}."
+ADD_EXERCISE_NO_WORKOUTS_MESSAGE = (
+    f"{_BASE_NOT_WORKOUTS_MESSAGE} "
+    f"Пожалуйста, создайте тренировку перед добавлением упражнений с помощью команды {html.bold(ADD_WORKOUT_COMMAND)}."
+)
+START_WORKOUT_NO_WORKOUTS_MESSAGE = (
+    f"{_BASE_NOT_WORKOUTS_MESSAGE} "
+    f"Пожалуйста, создайте тренировку, которую вы хотите начать, используя команду {html.bold(ADD_WORKOUT_COMMAND)}."
+)
 CANCELED_MESSAGE = (
-    "✅ Отменено. Если хотите начать заново, введите соответствующую команду."
+    "✅ Отменено. " "Если хотите начать заново, введите соответствующую команду."
 )
 
 # Exercises

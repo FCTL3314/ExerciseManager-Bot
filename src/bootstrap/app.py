@@ -24,7 +24,7 @@ from src.services.business.users import DefaultUserService
 from src.services.business.workouts import DefaultWorkoutService
 
 
-class Bootstrap:
+class AppInitializer:
     LOGS_BASE_DIR = Path("./logs/")
 
     @staticmethod
@@ -140,7 +140,7 @@ class Bootstrap:
             domain=config.settings.localization.domain,
         )
 
-    async def initialize_app(self) -> App:
+    async def init_app(self) -> App:
         config = await self._init_config()
         storage = await self._init_storage(config)
         logger_group = await self._init_logger_group(config)

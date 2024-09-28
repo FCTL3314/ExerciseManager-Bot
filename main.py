@@ -1,12 +1,10 @@
-import asyncio
+from src.bootstrap.app import AppInitializer
+from src.bootstrap.server import ServerRunner
 
-from src.bootstrap.app import Bootstrap
 
-
-async def main() -> None:
-    app = await Bootstrap().initialize_app()
-    return await app.bot.dp.start_polling(app.bot.client)
+def main() -> None:
+    ServerRunner(AppInitializer()).run_server()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
