@@ -32,7 +32,9 @@ async def handle_workout_exercise(
     exercise_text = EXERCISE_DESCRIPTION_MESSAGE.format(
         name=workout_exercise.exercise.name,
         description=workout_exercise.exercise.description,
-        duration=workout_exercise.exercise.get_humanized_duration("ru"), # TODO: Replace with i18n.current_locale
+        duration=workout_exercise.exercise.get_humanized_duration(
+            "ru"
+        ),  # TODO: Replace with i18n.current_locale
     )
 
     if workout_exercise.exercise.image:
@@ -80,7 +82,9 @@ async def get_on_tick(
     message: Message,
     message_template: str,
 ) -> Callable[..., Awaitable[Any]]:
-    async def on_tick(second: int, previous_tick_result: Message, *args, **kwargs) -> Any:
+    async def on_tick(
+        second: int, previous_tick_result: Message, *args, **kwargs
+    ) -> Any:
         if previous_tick_result is None:
             return await message.answer(
                 message_template.format(seconds_left=html.bold(second))

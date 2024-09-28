@@ -28,4 +28,6 @@ EXERCISE_DESCRIPTION_MESSAGE = (
     "<b>⏱️ Продолжительность:</b> {duration} секунд\n"
 )
 REST_PERIOD_TIMER_MESSAGE = "💤 Отдыхайте, осталось {seconds_left} секунд..."
-WORKOUT_EXERCISE_TIMER_MESSAGE = "🔥 Выполняйте упражнение, осталось {seconds_left} секунд..."
+WORKOUT_EXERCISE_TIMER_MESSAGE = (
+    "🔥 Выполняйте упражнение, осталось {seconds_left} секунд..."
+)
