@@ -1,6 +1,7 @@
+import asyncio
 import base64
 import pickle
-from typing import runtime_checkable, Protocol, Any
+from typing import runtime_checkable, Protocol, Any, Callable, Awaitable
 
 from src.config.types import ExerciseValidationSettings
 from src.database import KeyValueRepositoryProto

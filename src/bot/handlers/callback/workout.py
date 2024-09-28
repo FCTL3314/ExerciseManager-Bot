@@ -1,8 +1,9 @@
-import asyncio
+from collections.abc import Awaitable
+from typing import Any, Callable
 
 from aiogram import html
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
 
 from src.bot.callbacks import (
     WorkoutsSelectCallback,
@@ -21,6 +22,7 @@ from src.bot.services.shortcuts.message_templates import (
 from src.bot.services.workout import send_select_workout_keyboard_or_error_message
 from src.bot.states.workout import ExerciseAddingStates, StartWorkoutStates
 from src.config import Settings
+from src.services.business.timer import run_timer
 from src.services.business.workouts import WorkoutServiceProto
 
 
@@ -103,7 +105,9 @@ async def process_workout_exercise(
 
     workout_settings = await workout_service.get_workout_settings()
     workout_state = await workout_service.get_current_workout_state(data)
-    break_seconds = await workout_service.get_break_seconds(workout_state, workout_settings)
+    break_seconds = await workout_service.get_break_seconds(
+        workout_state, workout_settings
+    )
 
     workout_exercise = workout_state.current_workout_exercise
 
@@ -119,30 +123,38 @@ async def process_workout_exercise(
             f"{workout_exercise.exercise.description}\n",
         )
 
-    # Start: Start timer message
-    for i, seconds in enumerate(range(break_seconds, -1, -1)):
-        if await state.get_state() != StartWorkoutStates.doing_workout:
-            return
-        if i == 0:
-            timer_message = await callback_query.message.answer(
-                REST_PERIOD_TIMER_MESSAGE.format(seconds_left=html.bold(seconds))
-            )
-            continue
-        await timer_message.edit_text(  # noqa
-            REST_PERIOD_TIMER_MESSAGE.format(seconds_left=html.bold(seconds))
-        )
-        await asyncio.sleep(1)
+    async def get_on_tick(
+        message_template: str,
+    ) -> Callable[..., Awaitable[Any]]:
+        async def on_tick(
+            second: int, previous_response: Message, *args, **kwargs
+        ) -> Any:
+            if previous_response is None:
+                return await callback_query.message.answer(
+                    message_template.format(seconds_left=html.bold(second))
+                )
 
-    for seconds in range(
-        int(workout_exercise.exercise.duration.total_seconds()), -1, -1
-    ):
-        if await state.get_state() != StartWorkoutStates.doing_workout:
-            return
-        await timer_message.edit_text(
-            WORKOUT_EXERCISE_TIMER_MESSAGE.format(seconds_left=html.bold(seconds))
-        )
-        await asyncio.sleep(1)
-    # End
+            return await previous_response.edit_text(
+                message_template.format(seconds_left=html.bold(second))
+            )
+
+        return on_tick
+
+    async def should_continue(*args, **kwargs) -> bool:
+        return await state.get_state() == StartWorkoutStates.doing_workout
+
+    timer_message: Message = await run_timer(
+        break_seconds,
+        on_tick=await get_on_tick(REST_PERIOD_TIMER_MESSAGE),
+        should_continue=should_continue,
+    )
+
+    timer_message: Message = await run_timer(
+        int(workout_exercise.exercise.duration.total_seconds()),
+        on_tick=await get_on_tick(WORKOUT_EXERCISE_TIMER_MESSAGE),
+        should_continue=should_continue,
+        previous_response=timer_message,
+    )
 
     await timer_message.edit_text(
         f"✅ Упражнение {html.bold(workout_exercise.exercise.name)} выполнено!"
