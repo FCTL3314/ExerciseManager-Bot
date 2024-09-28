@@ -9,11 +9,11 @@ from aiogram.types import CallbackQuery
 from src.bot.callbacks import (
     WorkoutsSelectCallback,
     WorkoutsPaginationCallback,
-    StartWorkoutCallback,
+    NextExerciseCallback,
 )
 from src.bot.enums import MessageAction
 from src.bot.handlers.callback import router
-from src.bot.keyboards.inline.workouts import get_start_workout_keyboard
+from src.bot.keyboards.inline.workouts import get_next_exercise_keyboard
 from src.bot.services.shortcuts.message_templates import (
     ADD_EXERCISE_NO_WORKOUTS_MESSAGE,
     ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
@@ -80,7 +80,7 @@ async def process_start_workout_selection(
     workout_service: WorkoutServiceProto,
 ) -> None:
     workout = await workout_service.retrieve(workout_id=callback_data.workout_id)
-    keyboard = await get_start_workout_keyboard()
+    keyboard = await get_next_exercise_keyboard(text="🚀 Начать тренировку")
 
     serialized_workout_exercises = base64.b64encode(
         pickle.dumps(workout.workout_exercises)
@@ -104,7 +104,7 @@ async def process_start_workout_selection(
     )
 
 
-@router.callback_query(StartWorkoutStates.doing_workout, StartWorkoutCallback.filter())
+@router.callback_query(StartWorkoutStates.doing_workout, NextExerciseCallback.filter())
 async def process_workout_exercise(
     callback_query: CallbackQuery, state: FSMContext
 ) -> None:
@@ -187,7 +187,7 @@ async def process_workout_exercise(
     )
 
     if IS_MANUAL_MODE_ENABLED:
-        keyboard = await get_start_workout_keyboard(
+        keyboard = await get_next_exercise_keyboard(
             text="➡️ Перейти к следующему упражнению"
         )
         await timer_message.edit_reply_markup(reply_markup=keyboard)
