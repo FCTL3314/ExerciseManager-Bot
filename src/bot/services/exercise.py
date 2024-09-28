@@ -9,6 +9,8 @@ from src.bot.services.shortcuts.message_templates import (
     REST_PERIOD_TIMER_MESSAGE,
     WORKOUT_EXERCISE_TIMER_MESSAGE,
     EXERCISE_DESCRIPTION_MESSAGE,
+    EXERCISE_COMPLETED_MESSAGE,
+    WORKOUT_COMPLETED_MESSAGE,
 )
 from src.bot.states.workout import StartWorkoutStates
 from src.services.business.timer import run_timer
@@ -59,12 +61,12 @@ async def handle_workout_exercise(
     )
 
     await timer_message.edit_text(
-        f"✅ Упражнение {html.bold(workout_exercise.exercise.name)} выполнено!"
+        EXERCISE_COMPLETED_MESSAGE.format(name=workout_exercise.exercise.name)
     )
 
     if workout_state.no_more_exercises:
         await state.clear()
-        await message.answer("🎉 Тренировка закончена, ты молодец!")
+        await message.answer(WORKOUT_COMPLETED_MESSAGE)
         return
 
     await state.update_data(
