@@ -8,7 +8,8 @@ from src.models.workout import (
     Workout,
     WorkoutPaginatedResponse,
     WorkoutSettings,
-    WorkoutState, SerializedWorkoutState,
+    WorkoutState,
+    SerializedWorkoutState,
 )
 from src.services.api.exercises import ExerciseAPIClientProto
 from src.services.api.workouts import WorkoutAPIClientProto
@@ -48,9 +49,15 @@ class WorkoutServiceProto(BaseServiceProto, Protocol):
 
     async def get_workout_settings(self) -> WorkoutSettings: ...
 
-    async def create_serialized_workout_state(self, workout: Workout) -> SerializedWorkoutState: ...
+    async def create_serialized_workout_state(
+        self, workout: Workout
+    ) -> SerializedWorkoutState: ...
 
     async def get_current_workout_state(self, data: dict[str, Any]) -> WorkoutState: ...
+
+    async def get_break_seconds(
+        self, workout_state: WorkoutState, workout_settings: WorkoutSettings
+    ) -> int: ...
 
 
 class DefaultWorkoutService(BaseService):
@@ -137,7 +144,9 @@ class DefaultWorkoutService(BaseService):
         )
 
     @staticmethod
-    async def create_serialized_workout_state(workout: Workout) -> SerializedWorkoutState:
+    async def create_serialized_workout_state(
+        workout: Workout,
+    ) -> SerializedWorkoutState:
         serialized_workout_exercises = base64.b64encode(
             pickle.dumps(workout.workout_exercises)
         ).decode("utf-8")
@@ -156,4 +165,14 @@ class DefaultWorkoutService(BaseService):
         return WorkoutState(
             workout_exercises=workout_exercises,
             current_workout_exercise=current_workout_exercise,
+        )
+
+    @staticmethod
+    async def get_break_seconds(
+        workout_state: WorkoutState, workout_settings: WorkoutSettings
+    ) -> int:
+        return (
+            workout_settings.pre_start_timer_seconds
+            if workout_state.is_first_exercise
+            else int(workout_state.current_workout_exercise.break_time.total_seconds())
         )

@@ -103,6 +103,8 @@ async def process_workout_exercise(
 
     workout_settings = await workout_service.get_workout_settings()
     workout_state = await workout_service.get_current_workout_state(data)
+    break_seconds = await workout_service.get_break_seconds(workout_state, workout_settings)
+
     workout_exercise = workout_state.current_workout_exercise
 
     if workout_exercise.exercise.image:
@@ -116,14 +118,6 @@ async def process_workout_exercise(
             f"{html.bold(workout_exercise.exercise.name)}\n"
             f"{workout_exercise.exercise.description}\n",
         )
-
-    # Start: Generate break seconds
-    break_seconds = (
-        workout_settings.pre_start_timer_seconds
-        if workout_state.is_first_exercise
-        else int(workout_exercise.break_time.total_seconds())
-    )
-    # End
 
     # Start: Start timer message
     for i, seconds in enumerate(range(break_seconds, -1, -1)):
