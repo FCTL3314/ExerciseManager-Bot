@@ -15,14 +15,6 @@ restart_local_services: down_local_services up_local_services
 local_services_logs:
 	docker compose -p $(DOCKER_COMPOSE_PROJECT_NAME) -f $(LOCAL_DOCKER_COMPOSE_FILE) logs
 
-# Mypy
-typecheck:
-	mypy .
-
-# Formating
-format:
-	black .
-
 # Localization
 DEFAULT_LOCALES_DIR=locales
 
@@ -35,4 +27,4 @@ SERVICE_NAME = exercise_manager_tg_bot
 get_updates:
 	git pull
 	sudo systemctl restart $(SERVICE_NAME)
-	sudo systemctl status $(SERVICE_NAME)
+	sudo systemctl --no-pager status $(SERVICE_NAME)
