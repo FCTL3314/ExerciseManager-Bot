@@ -22,9 +22,9 @@ compile_locales:
 	python scripts/compile_locales.py $(or $(LOCALES_DIR), $(DEFAULT_LOCALES_DIR))
 
 # Deployment
-SERVICE_NAME = exercise_manager_tg_bot
+DEFAULT_SERVICE_NAME = exercise_manager_tg_bot
 
 get_updates:
 	git pull
-	sudo systemctl restart $(SERVICE_NAME)
-	sudo systemctl --no-pager status $(SERVICE_NAME)
+	sudo systemctl restart $(or $(SERVICE_NAME), $(DEFAULT_SERVICE_NAME))
+	sudo systemctl --no-pager status $(or $(SERVICE_NAME), $(DEFAULT_SERVICE_NAME))
