@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI
 
 from src.bootstrap import AppInitializerProto
-from src.server.controllers import init_tg_update_webhook
+from src.server.controllers.webhooks import register_telegram_updates_webhook
 
 
 class ServerRunner:
@@ -17,7 +17,9 @@ class ServerRunner:
     @asynccontextmanager
     async def lifespan(self, app: FastAPI) -> AsyncContextManager[None]:
         _app = await self.app_initializer.init_app()
-        await init_tg_update_webhook(app, _app.bot.client, _app.bot.dp, _app.config)
+        await register_telegram_updates_webhook(
+            app, _app.bot.client, _app.bot.dp, _app.config
+        )
         yield
 
     def run_server(self) -> None:
