@@ -35,3 +35,4 @@ SERVICE_NAME = exercise_manager_tg_bot
 get_updates:
 	git pull
 	sudo systemctl restart $(SERVICE_NAME)
+	sudo systemctl status $(SERVICE_NAME)
