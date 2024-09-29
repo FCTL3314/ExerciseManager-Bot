@@ -28,7 +28,7 @@ class WorkoutServiceProto(BaseServiceProto, Protocol):
 
     async def list(
         self,
-        user_id: int | str | None,
+        tg_user_id: int | str | None,
         limit: int = 64,
         offset: int = 0,
     ) -> WorkoutPaginatedResponse: ...
@@ -82,15 +82,15 @@ class DefaultWorkoutService(BaseService):
 
     async def list(
         self,
-        user_id: int | str | None,
+        tg_user_id: int | str | None,
         limit: int = 64,
         offset: int = 0,
     ) -> WorkoutPaginatedResponse:
-        api_user_id = await self._auth_service.get_user_id_by_tg_user_id(
-            user_id=user_id
+        user_id = await self._auth_service.get_user_id_by_tg_user_id(
+            tg_user_id=tg_user_id
         )
         return await self._workout_api_client.list(
-            user_id=api_user_id, limit=limit, offset=offset
+            user_id=user_id, limit=limit, offset=offset
         )
 
     @BaseService.refresh_tokens_on_unauthorized

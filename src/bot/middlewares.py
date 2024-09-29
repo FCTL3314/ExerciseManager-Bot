@@ -6,7 +6,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import TelegramObject
 
 from src.bootstrap.types import Services
+from src.bot.services.shortcuts.commands import CommandsGroup
 from src.config import Config
+from src.services.business import AuthServiceProto
+from src.services.business.exceptions import UnauthorizedError
 
 
 class ConfigMiddleware(BaseMiddleware):
@@ -74,3 +77,38 @@ class ClearStateOnErrorMiddleware(BaseMiddleware):
             if state is not None:
                 await state.clear()
             raise e
+
+
+class AuthCheckMiddleware(BaseMiddleware):
+    def __init__(
+        self,
+        commands_group: CommandsGroup,
+        auth_service: AuthServiceProto,
+    ) -> None:
+        self._auth_service = auth_service
+        self._commands_group = commands_group
+
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, dict], Awaitable[Any]],
+        event: TelegramObject,
+        data: dict,
+    ) -> Any:
+        message_text = event.message.text
+        tg_user_id = event.message.from_user.id
+
+        for command in self._commands_group.commands:
+
+            if not command.is_match(message_text):
+                continue
+
+            if not command.require_auth:
+                continue
+
+            user_id = await self._auth_service.get_user_id_by_tg_user_id(
+                tg_user_id=tg_user_id
+            )
+            if user_id is None:
+                raise UnauthorizedError
+
+        return await handler(event, data)

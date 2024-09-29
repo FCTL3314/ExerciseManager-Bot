@@ -3,6 +3,11 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from src.bot.handlers.commands import router
+from src.bot.services.shortcuts.commands import (
+    ADD_WORKOUT_COMMAND,
+    ADD_EXERCISE_COMMAND,
+    START_WORKOUT_COMMAND,
+)
 from src.bot.services.shortcuts.message_templates import (
     INVALID_WORKOUT_NAME_MESSAGE,
     INVALID_EXERCISE_NAME_MESSAGE,
@@ -10,11 +15,6 @@ from src.bot.services.shortcuts.message_templates import (
     ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE,
     START_WORKOUT_WORKOUT_SELECTION_MESSAGE,
     START_WORKOUT_NO_WORKOUTS_MESSAGE,
-)
-from src.bot.services.shortcuts.commands import (
-    ADD_WORKOUT_COMMAND,
-    ADD_EXERCISE_COMMAND,
-    START_WORKOUT_COMMAND,
 )
 from src.bot.services.workout import send_select_workout_keyboard_or_error_message
 from src.bot.states.workout import (

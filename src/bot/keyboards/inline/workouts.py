@@ -20,7 +20,7 @@ async def get_select_workout_keyboard(
     offset: int = 0,
 ) -> InlineKeyboardMarkup:
     paginated_workouts = await workout_service.list(
-        user_id=user_id, limit=limit, offset=offset
+        tg_user_id=user_id, limit=limit, offset=offset
     )
 
     if not paginated_workouts.results:

@@ -7,11 +7,23 @@ from aiogram.types import ErrorEvent, Message
 from aiohttp import ClientResponseError
 
 from src.bot.handlers.errors import router
+from src.services.business.exceptions import UnauthorizedError
 
 
-@router.error(ExceptionTypeFilter(ClientResponseError), F.update.message.as_("message"))
-async def api_error_handler(event: ErrorEvent, message: Message, logger: Logger):
-    status = HTTPStatus(event.exception.status)  # noqa
+@router.error(
+    ExceptionTypeFilter(ClientResponseError, UnauthorizedError),
+    F.update.message.as_("message"),
+)
+async def api_error_handler(
+    event: ErrorEvent, message: Message, logger: Logger
+) -> None:
+    if isinstance(event.exception, UnauthorizedError):
+        status = HTTPStatus.UNAUTHORIZED
+    elif isinstance(event.exception, ClientResponseError):
+        status = HTTPStatus(event.exception.status)  # noqa
+    else:
+        status = HTTPStatus.INTERNAL_SERVER_ERROR
+
     match status:
         case HTTPStatus.UNAUTHORIZED:
             await message.answer(

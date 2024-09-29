@@ -21,7 +21,7 @@ class AuthServiceProto(Protocol):
 
     async def refresh_tokens(self, user_id: int | str) -> bool: ...
 
-    async def get_user_id_by_tg_user_id(self, user_id: int | str) -> str | None: ...
+    async def get_user_id_by_tg_user_id(self, tg_user_id: int | str) -> str | None: ...
 
 
 class DefaultAuthService:
@@ -78,9 +78,10 @@ class DefaultAuthService:
         )
         return True
 
-    async def get_user_id_by_tg_user_id(self, user_id: int | str) -> str | None:
-        return str(
-            await self._storage.get(
-                self.USER_ID_BY_TG_ID_KEY_TEMPLATE.format(tg_user_id=user_id)
-            )
+    async def get_user_id_by_tg_user_id(self, tg_user_id: int | str) -> str | None:
+        user_id = await self._storage.get(
+            self.USER_ID_BY_TG_ID_KEY_TEMPLATE.format(tg_user_id=tg_user_id)
         )
+        if user_id is None:
+            return None
+        return str(user_id)

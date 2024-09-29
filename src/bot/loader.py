@@ -13,8 +13,10 @@ from src.bot.middlewares import (
     ConfigMiddleware,
     ServicesMiddleware,
     ClearStateOnErrorMiddleware,
+    AuthCheckMiddleware,
 )
 from src.bot.services.lifecycle import on_startup, on_shutdown
+from src.bot.services.shortcuts.commands import CommandsGroup
 from src.bot.types import Bot
 from src.config import Config
 
@@ -31,11 +33,13 @@ class BotLoader(IBotLoader):
         logger_group: LoggerGroup,
         services: Services,
         i18n: I18n,
+        commands_group: CommandsGroup,
     ) -> None:
         self._config = config
         self._logger_group = logger_group
         self._services = services
         self._i18n = i18n
+        self._commands_group = commands_group
 
     async def _create_bot(self) -> ABot:
         return ABot(
@@ -58,6 +62,9 @@ class BotLoader(IBotLoader):
         dp.update.middleware(SimpleI18nMiddleware(self._i18n))
         dp.update.outer_middleware(LoggingMiddleware(self._logger_group.general))
         dp.update.outer_middleware(ClearStateOnErrorMiddleware())
+        dp.update.outer_middleware(
+            AuthCheckMiddleware(self._commands_group, self._services.auth)
+        )
 
     @staticmethod
     async def _register_lifecycle(dp: Dispatcher) -> None:
@@ -70,11 +77,13 @@ class BotLoader(IBotLoader):
             self._config.env.bot.token
         )
 
-        if existed_webhook.url != current_webhook_url:
-            await bot.set_webhook(
-                current_webhook_url,
-                secret_token=self._config.env.bot.webhook_secret,
-            )
+        if existed_webhook.url == current_webhook_url:
+            return
+
+        await bot.set_webhook(
+            current_webhook_url,
+            secret_token=self._config.env.bot.webhook_secret,
+        )
 
     async def load(self) -> Bot:
         bot = await self._create_bot()

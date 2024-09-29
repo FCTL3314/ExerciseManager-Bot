@@ -6,6 +6,7 @@ from aiogram.utils.i18n import I18n
 
 from src.bootstrap.types import App, LoggerGroup, Services
 from src.bot.loader import BotLoader
+from src.bot.services.shortcuts.commands import build_default_commands_group
 from src.bot.types import Bot
 from src.config import ConfigLoader
 from src.config.environment import EnvironmentConfigLoader
@@ -55,11 +56,13 @@ class AppInitializer:
         services: Services,
         i18n: I18n,
     ) -> Bot:
+        commands_group = build_default_commands_group()
         bot_loader = BotLoader(
             config=config,
             logger_group=logger_group,
             services=services,
             i18n=i18n,
+            commands_group=commands_group,
         )
         return await bot_loader.load()
 
