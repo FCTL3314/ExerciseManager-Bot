@@ -12,12 +12,14 @@
 </div>
 
 # 📃 Notes
+* In order for your application to have access to endpoints, you need to run the backend server locally using [ExerciseManager-Backend](https://github.com/FCTL3314/ExerciseManager-Backend) repository. Follow the setup and run instructions provided in the repository.
 * All Docker volumes are stored in the `docker/local/volumes/` folder. If you want to clear your DB or any other data, you can simply delete the folder there.
 
 # ⚒️ Development
 1. Download dependencies: `pip install -r requirements.txt`
 2. Create an `.env` file or rename `.env.dist` in `.env` and populate it with development variables.
-   * For `WEBHOOK_HOST` variable you can use ngrok http tunnel: `ngrok http 8000`
+   * For the `WEBHOOK_HOST` variable, you can use a ngrok HTTP tunnel by running: `ngrok http 8000`
+   * For the `API_BASE_URL` variable, use the base URL of your locally installed server, for example: `http://127.0.0.1:8080/api/v1/`
 3. Start docker services: `make up_local_services`
 4. Compile localization files: `make compile_locales`
    * If the locales directory has changed, you can specify it explicitly: `make compile_locales LOCALES_DIR=new/location/`
