@@ -1,3 +1,5 @@
+.PHONY: update
+
 # Docker services
 DOCKER_COMPOSE_PROJECT_NAME=exercise_manager_bot_services_local
 LOCAL_DOCKER_COMPOSE_FILE=./docker/local/docker-compose.yml
@@ -26,3 +28,10 @@ DEFAULT_LOCALES_DIR=locales
 
 compile_locales:
 	python scripts/compile_locales.py $(or $(LOCALES_DIR), $(DEFAULT_LOCALES_DIR))
+
+# Deployment
+SERVICE_NAME = exercise_manager_tg_bot
+
+get_updates:
+	git pull
+	sudo systemctl restart $(SERVICE_NAME)
