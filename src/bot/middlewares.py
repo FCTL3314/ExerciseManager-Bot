@@ -94,6 +94,9 @@ class AuthCheckMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict,
     ) -> Any:
+        if not isinstance(event, Message):
+            return await handler(event, data)
+
         message_text = event.message.text
         tg_user_id = event.message.from_user.id
 
