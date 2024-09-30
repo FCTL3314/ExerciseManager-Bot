@@ -3,7 +3,7 @@ from typing import Any, Awaitable, Callable
 
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from aiogram.fsm.context import FSMContext
-from aiogram.types import TelegramObject
+from aiogram.types import TelegramObject, Message
 
 from src.bootstrap.types import Services
 from src.bot.services.shortcuts.commands import CommandsGroup
