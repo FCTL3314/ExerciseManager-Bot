@@ -69,7 +69,7 @@ CANCELED_MESSAGE = (
 EXERCISE_DESCRIPTION_MESSAGE = (
     "<b>🏋️ Упражнение:</b> {name}\n"
     "<b>📄 Описание:</b> {description}\n"
-    "<b>⏱️ Продолжительность:</b> {duration} секунд\n"
+    "<b>⏱️ Продолжительность:</b> {duration}\n"
 )
 EXERCISE_COMPLETED_MESSAGE = "✅ Упражнение <b>{name}</b> выполнено!"
 REST_PERIOD_TIMER_MESSAGE = "💤 Отдыхайте, осталось {seconds_left} секунд..."

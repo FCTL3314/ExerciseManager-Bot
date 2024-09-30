@@ -34,7 +34,7 @@ async def handle_workout_exercise(
 
     exercise_text = EXERCISE_DESCRIPTION_MESSAGE.format(
         name=workout_exercise.exercise.name,
-        description=workout_exercise.exercise.description or html.italic("Отсутствует"),
+        description=workout_exercise.exercise.description or "",
         duration=workout_exercise.exercise.get_humanized_duration(
             "ru"
         ),  # TODO: Replace with i18n.current_locale
