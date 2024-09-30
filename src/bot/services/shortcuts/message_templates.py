@@ -4,6 +4,7 @@ from src.bot.services.shortcuts.commands import (
     ADD_WORKOUT_COMMAND,
     LOGIN_COMMAND,
     REGISTER_COMMAND,
+    ADD_EXERCISE_COMMAND,
 )
 
 # Start
@@ -33,6 +34,10 @@ INVALID_EXERCISE_NAME_MESSAGE = (
     f"❌ Название упражнения должно быть от {html.bold("{min_length}")} до {html.bold("{max_length}")} символов. "
     f"Пожалуйста, попробуйте снова:"
 )
+INVALID_URL_MESSAGE = (
+    "❌ Введённый URL недействителен. Пожалуйста, убедитесь, что ссылка начинается с "
+    f"{html.bold("http://")} или {html.bold("https://")} и попробуйте снова:"
+)
 
 # User action requests
 ADD_EXERCISE_WORKOUT_SELECTION_MESSAGE = (
@@ -43,14 +48,18 @@ START_WORKOUT_WORKOUT_SELECTION_MESSAGE = (
 )
 
 # State notifications
-_BASE_NOT_WORKOUTS_MESSAGE = "❌ У вас пока нет созданных тренировок."
+_BASE_NO_WORKOUTS_MESSAGE = "❌ У вас пока нет созданных тренировок."
 ADD_EXERCISE_NO_WORKOUTS_MESSAGE = (
-    f"{_BASE_NOT_WORKOUTS_MESSAGE} "
+    f"{_BASE_NO_WORKOUTS_MESSAGE} "
     f"Пожалуйста, создайте тренировку перед добавлением упражнений с помощью команды {html.bold(ADD_WORKOUT_COMMAND)}."
 )
 START_WORKOUT_NO_WORKOUTS_MESSAGE = (
-    f"{_BASE_NOT_WORKOUTS_MESSAGE} "
+    f"{_BASE_NO_WORKOUTS_MESSAGE} "
     f"Пожалуйста, создайте тренировку, которую вы хотите начать, используя команду {html.bold(ADD_WORKOUT_COMMAND)}."
+)
+NO_EXERCISES_MESSAGE = (
+    "❌ У вас пока нет упражнений для этой тренировки тренировок."
+    f"Пожалуйста, добавьте упражнения, используя команду {html.bold(ADD_EXERCISE_COMMAND)}."
 )
 CANCELED_MESSAGE = (
     "✅ Отменено. " "Если хотите начать заново, введите соответствующую команду."

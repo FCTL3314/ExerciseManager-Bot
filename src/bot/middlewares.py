@@ -3,7 +3,7 @@ from typing import Any, Awaitable, Callable
 
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from aiogram.fsm.context import FSMContext
-from aiogram.types import TelegramObject, Message
+from aiogram.types import TelegramObject
 
 from src.bootstrap.types import Services
 from src.bot.services.shortcuts.commands import CommandsGroup
@@ -94,11 +94,8 @@ class AuthCheckMiddleware(BaseMiddleware):
         event: TelegramObject,
         data: dict,
     ) -> Any:
-        if not isinstance(event, Message):
-            return await handler(event, data)
-
-        message_text = event.message.text
-        tg_user_id = event.message.from_user.id
+        message_text = event.text
+        tg_user_id = event.from_user.id
 
         for command in self._commands_group.commands:
 

@@ -15,7 +15,6 @@ from src.bot.middlewares import (
     ClearStateOnErrorMiddleware,
     AuthCheckMiddleware,
 )
-from src.bot.services.lifecycle import on_startup, on_shutdown
 from src.bot.services.shortcuts.commands import CommandsGroup
 from src.bot.types import Bot
 from src.config import Config
@@ -62,14 +61,9 @@ class BotLoader(IBotLoader):
         dp.update.middleware(SimpleI18nMiddleware(self._i18n))
         dp.update.outer_middleware(LoggingMiddleware(self._logger_group.general))
         dp.update.outer_middleware(ClearStateOnErrorMiddleware())
-        dp.update.outer_middleware(
+        dp.message.outer_middleware(
             AuthCheckMiddleware(self._commands_group, self._services.auth)
         )
-
-    @staticmethod
-    async def _register_lifecycle(dp: Dispatcher) -> None:
-        dp.startup.register(on_startup)
-        dp.shutdown.register(on_shutdown)
 
     async def _setup_webhook(self, bot: ABot) -> None:
         existed_webhook = await bot.get_webhook_info()
@@ -90,11 +84,11 @@ class BotLoader(IBotLoader):
         storage = await self._create_storage()
         dp = await self._create_dispatcher(storage)
 
-        await self._register_lifecycle(dp)
         await self._init_middlewares(dp)
         await self._setup_webhook(bot)
 
         return Bot(
             client=bot,
             dp=dp,
+            commands_group=self._commands_group,
         )

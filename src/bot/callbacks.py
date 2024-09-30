@@ -16,4 +16,12 @@ class StartWorkoutCallback(CallbackData, prefix="start_workout"):
     manual_mode_enabled: bool
 
 
+class SkipExerciseDescriptionCallback(
+    CallbackData, prefix="skip_exercise_description"
+): ...
+
+
+class SkipExerciseImageCallback(CallbackData, prefix="skip_exercise_image"): ...
+
+
 class NextExerciseCallback(CallbackData, prefix="next_exercise"): ...

@@ -5,6 +5,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
 from src.bot.keyboards.inline.workouts import get_next_exercise_keyboard
+from src.bot.services.messages import send_file_by_url
 from src.bot.services.shortcuts.message_templates import (
     REST_PERIOD_TIMER_MESSAGE,
     WORKOUT_EXERCISE_TIMER_MESSAGE,
@@ -33,15 +34,16 @@ async def handle_workout_exercise(
 
     exercise_text = EXERCISE_DESCRIPTION_MESSAGE.format(
         name=workout_exercise.exercise.name,
-        description=workout_exercise.exercise.description,
+        description=workout_exercise.exercise.description or html.italic("Отсутствует"),
         duration=workout_exercise.exercise.get_humanized_duration(
             "ru"
         ),  # TODO: Replace with i18n.current_locale
     )
 
     if workout_exercise.exercise.image:
-        await message.answer_photo(
-            photo=workout_exercise.exercise.image,
+        await send_file_by_url(
+            message,
+            workout_exercise.exercise.image,
             caption=exercise_text,
         )
     else:

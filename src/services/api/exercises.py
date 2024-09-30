@@ -8,14 +8,14 @@ from src.services.api import BaseAPIClientProto, BaseAPIClient
 @runtime_checkable
 class ExerciseAPIClientProto(BaseAPIClientProto, Protocol):
     async def create(
-        self, access_token: str, name: str, description: str, duration: int
+        self, access_token: str, name: str, description: str, image: str, duration: int
     ) -> Exercise: ...
 
 
 class DefaultExerciseAPIClient(BaseAPIClient):
 
     async def create(
-        self, access_token: str, name: str, description: str, duration: int
+        self, access_token: str, name: str, description: str, image: str, duration: int
     ) -> Exercise:
         data = await self.request(
             "POST",
@@ -23,6 +23,7 @@ class DefaultExerciseAPIClient(BaseAPIClient):
             data={
                 "name": name,
                 "description": description,
+                "image": image,
                 "duration": duration,
             },
             headers=await self.get_auth_header(access_token),

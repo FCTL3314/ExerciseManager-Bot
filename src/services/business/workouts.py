@@ -43,6 +43,7 @@ class WorkoutServiceProto(BaseServiceProto, Protocol):
         workout_id: int | str,
         name: str,
         description: str,
+        image: str,
         duration: str,
         break_time: str,
     ) -> Workout: ...
@@ -105,6 +106,7 @@ class DefaultWorkoutService(BaseService):
         workout_id: int | str,
         name: str,
         description: str,
+        image: str,
         duration: str,
         break_time: str,
     ) -> Workout:
@@ -123,6 +125,7 @@ class DefaultWorkoutService(BaseService):
             access_token,
             name,
             description,
+            image,
             await ato_nanoseconds(_duration),
         )
         return await self._workout_api_client.add_exercise(
