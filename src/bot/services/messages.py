@@ -4,7 +4,10 @@ from collections.abc import Callable
 from aiogram.types import Message
 
 
-async def get_send_method_by_mimetype(mimetype: str) -> Callable:
+async def get_send_method_by_mimetype(mimetype: str | None) -> Callable:
+    if mimetype is None:
+        return Message.answer_document
+
     if mimetype.startswith("image/gif"):
         return Message.answer_animation
     elif mimetype == "image/":
