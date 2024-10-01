@@ -5,7 +5,9 @@ from src.bot.callbacks import (
     WorkoutsPaginationCallback,
     DisabledCallback,
     NextExerciseCallback,
-    StartWorkoutCallback, PauseWorkoutCallback, ResumeWorkoutCallback,
+    StartWorkoutCallback,
+    PauseWorkoutCallback,
+    ResumeWorkoutCallback,
 )
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.collections import chunk_list
@@ -136,5 +138,3 @@ async def create_resume_workout_keyboard() -> InlineKeyboardMarkup:
         row_width=1,
         inline_keyboard=btns,
     )
-
-

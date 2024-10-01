@@ -14,7 +14,9 @@ from src.bot.states.workout import StartWorkoutStates, ExerciseAddingStates
 from src.services.business.workouts import WorkoutServiceProto
 
 
-@router.callback_query(StartWorkoutStates.workout_in_progress, NextExerciseCallback.filter())
+@router.callback_query(
+    StartWorkoutStates.workout_in_progress, NextExerciseCallback.filter()
+)
 async def process_next_exercise(
     callback_query: CallbackQuery,
     state: FSMContext,

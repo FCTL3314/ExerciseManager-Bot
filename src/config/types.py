@@ -2,17 +2,19 @@ from dataclasses import dataclass
 from datetime import timedelta
 from urllib.parse import urljoin
 
+from src.constants import TELEGRAM_UPDATES_WEBHOOK_PATH
+
 
 @dataclass(frozen=True)
 class BotConfig:
     token: str
+    use_webhook: bool
     webhook_host: str
-    webhook_path: str
     webhook_secret: str
 
     @property
     def webhook_url(self) -> str:
-        return urljoin(self.webhook_host, self.webhook_path)
+        return urljoin(self.webhook_host, TELEGRAM_UPDATES_WEBHOOK_PATH)
 
     def build_webhook_url_with_token(self, token: str) -> str:
         return self.webhook_url.format(token=token)

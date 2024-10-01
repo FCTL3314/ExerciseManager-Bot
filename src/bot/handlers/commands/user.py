@@ -62,6 +62,7 @@ async def process_registration_username(
 async def process_registration_password(
     message: Message, state: FSMContext, settings: Settings
 ) -> None:
+    await message.delete()
     password = message.text.strip()
     if not await is_password_valid(password, settings.validation.user):
         await message.answer(
@@ -81,6 +82,7 @@ async def process_registration_password(
 async def process_registration_password_retype(
     message: Message, state: FSMContext, auth_service: AuthServiceProto
 ) -> None:
+    await message.delete()
     data = await state.get_data()
 
     username = data["username"]
@@ -95,7 +97,7 @@ async def process_registration_password_retype(
         )
         await message.answer(
             "Регистрация успешно завершена! 🎉\n\n"
-            f"Теперь вы можете использовать свои данные для входа в систему ({html.bold(LOGIN_COMMAND)}. "
+            f"Теперь вы можете использовать свои данные для входа в систему {html.bold(LOGIN_COMMAND)}. "
             f"Если возникнут вопросы, напишите команду {html.bold(HELP_COMMAND)}."
         )
         await state.clear()

@@ -25,7 +25,7 @@ class IBotLoader(ABC):
     async def load(self) -> Bot: ...
 
 
-class BotLoader(IBotLoader):
+class BotLoader(IBotLoader):  # TODO: Try to move some methods to lifecycle
     def __init__(
         self,
         config: Config,

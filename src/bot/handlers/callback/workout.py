@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
@@ -112,7 +114,9 @@ async def process_start_workout(
 ) -> None:
     await state.update_data(manual_mode_enabled=callback_data.manual_mode_enabled)
     await callback_query.answer()
-    await handle_workout_exercise(callback_query.message, workout_service, state)
+    asyncio.create_task(
+        handle_workout_exercise(callback_query.message, workout_service, state)
+    )
 
 
 @router.callback_query(

@@ -114,6 +114,7 @@ async def get_should_continue(state: FSMContext) -> Callable[..., Awaitable[Any]
 
     return should_continue
 
+
 async def get_should_pause(state: FSMContext) -> Callable[..., Awaitable[Any]]:
     async def should_pause(*args, **kwargs) -> bool:
         return await state.get_state() == StartWorkoutStates.paused

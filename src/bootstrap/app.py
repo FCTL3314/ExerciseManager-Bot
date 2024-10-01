@@ -1,31 +1,32 @@
+import asyncio
 import logging
 import sys
 from pathlib import Path
 
 from aiogram.utils.i18n import I18n
 
-from src.bootstrap.types import App, LoggerGroup, Services
-from src.bot.loader import BotLoader
-from src.bot.services.shortcuts.commands import build_default_commands_group
-from src.bot.types import Bot
-from src.config import ConfigLoader
+from src.bootstrap import App
+from src.bootstrap.bot import BotInitializer
+from src.bootstrap.server import ServerRunner
+from src.bootstrap.types import LoggerGroup, Services
+from src.config import Config, ConfigLoader
 from src.config.environment import EnvironmentConfigLoader
 from src.config.settings import SettingsLoader
-from src.config.types import Config
 from src.database import KeyValueRepositoryProto
 from src.database.redis import RedisRepository
 from src.services.api.auth import DefaultAuthAPIClient
 from src.services.api.exercises import DefaultExerciseAPIClient
 from src.services.api.users import DefaultUserAPIClient
 from src.services.api.workouts import DefaultWorkoutAPIClient
+from src.services.business import TokenManagerProto
 from src.services.business.auth import DefaultAuthService
 from src.services.business.exercises import DefaultExerciseService
-from src.services.business.token_manager import TokenManager, TokenManagerProto
+from src.services.business.token_manager import TokenManager
 from src.services.business.users import DefaultUserService
 from src.services.business.workouts import DefaultWorkoutService
 
 
-class AppInitializer:
+class AppStarter:
     LOGS_BASE_DIR = Path("./logs/")
 
     @staticmethod
@@ -38,37 +39,9 @@ class AppInitializer:
 
     @staticmethod
     async def _init_storage(config: Config) -> KeyValueRepositoryProto:
-        storage = RedisRepository(
+        return RedisRepository(
             host=config.env.redis.host, port=config.env.redis.port, db=0
         )
-        return storage
-
-    @staticmethod
-    async def _init_token_manager(
-        storage: KeyValueRepositoryProto,
-    ) -> TokenManagerProto:
-        return TokenManager(storage)
-
-    @staticmethod
-    async def _init_bot(
-        config: Config,
-        logger_group: LoggerGroup,
-        services: Services,
-        i18n: I18n,
-    ) -> Bot:
-        commands_group = build_default_commands_group()
-        bot_loader = BotLoader(
-            config=config,
-            logger_group=logger_group,
-            services=services,
-            i18n=i18n,
-            commands_group=commands_group,
-        )
-        return await bot_loader.load()
-
-    @staticmethod
-    async def _configure_logging() -> None:
-        logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 
     @classmethod
     async def __init_logger(cls, path: str, config: Config) -> logging.Logger:
@@ -98,6 +71,12 @@ class AppInitializer:
         return LoggerGroup(
             general=general,
         )
+
+    @staticmethod
+    async def _init_token_manager(
+        storage: KeyValueRepositoryProto,
+    ) -> TokenManagerProto:
+        return TokenManager(storage)
 
     @staticmethod
     async def _init_services(
@@ -143,14 +122,18 @@ class AppInitializer:
             domain=config.settings.localization.domain,
         )
 
-    async def init_app(self) -> App:
+    @staticmethod
+    async def _configure_logging() -> None:
+        logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+
+    async def _init_app(self) -> App:
         config = await self._init_config()
         storage = await self._init_storage(config)
         logger_group = await self._init_logger_group(config)
-        i18n = await self._init_i18n(config)
         token_manager = await self._init_token_manager(storage)
         services = await self._init_services(config, token_manager, storage)
-        bot = await self._init_bot(config, logger_group, services, i18n)
+        i18n = await self._init_i18n(config)
+        bot = await BotInitializer(config, logger_group, services, i18n).init_bot()
 
         await self._configure_logging()
 
@@ -161,3 +144,17 @@ class AppInitializer:
             services=services,
             bot=bot,
         )
+
+    async def start_app(self) -> None:
+        app = await self._init_app()
+        if app.config.env.bot.use_webhook:
+            server_runner = ServerRunner(
+                app.bot,
+                app.services,
+                app.logger_group,
+                app.config,
+            )
+            await server_runner.run_server(asyncio.get_event_loop())
+        else:
+            await app.bot.client.delete_webhook()
+            await app.bot.dp.start_polling(app.bot.client)

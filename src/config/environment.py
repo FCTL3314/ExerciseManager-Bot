@@ -1,19 +1,28 @@
 from decouple import RepositoryEnv, Config
 
-from src.config import EnvironmentConfigLoaderProto
 from src.config.types import BotConfig, EnvironmentConfig, RedisConfig, APIConfig
 
 
-class EnvironmentConfigLoader(EnvironmentConfigLoaderProto):
+class EnvironmentConfigLoader:
     def __init__(self) -> None:
         self._config = Config(RepositoryEnv(".env"))
 
     async def _load_bot_config(self) -> BotConfig:
+        use_webhook = self._config("USE_WEBHOOK", cast=bool)
+        webhook_host = self._config("WEBHOOK_HOST")
+        webhook_secret = self._config("WEBHOOK_SECRET")
+
+        if use_webhook and not all((webhook_host, webhook_secret)):
+            raise ValueError(
+                "WEBHOOK_HOST, WEBHOOK_PATH, and WEBHOOK_SECRET environment "
+                "variables are required when using webhook."
+            )
+
         return BotConfig(
             token=self._config("BOT_TOKEN"),
-            webhook_host=self._config("WEBHOOK_HOST"),
-            webhook_path=self._config("WEBHOOK_PATH"),
-            webhook_secret=self._config("WEBHOOK_SECRET"),
+            use_webhook=use_webhook,
+            webhook_host=webhook_host,
+            webhook_secret=webhook_secret,
         )
 
     async def _load_api_config(self) -> APIConfig:

@@ -1,10 +1,11 @@
-from src.bootstrap.app import AppInitializer
-from src.bootstrap.server import ServerRunner
+import asyncio
+
+from src.bootstrap.app import AppStarter
 
 
-def main() -> None:
-    ServerRunner(AppInitializer()).run_server()
+async def main() -> None:
+    await AppStarter().start_app()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
