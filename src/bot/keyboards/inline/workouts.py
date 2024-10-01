@@ -5,14 +5,14 @@ from src.bot.callbacks import (
     WorkoutsPaginationCallback,
     DisabledCallback,
     NextExerciseCallback,
-    StartWorkoutCallback,
+    StartWorkoutCallback, PauseWorkoutCallback, ResumeWorkoutCallback,
 )
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.collections import chunk_list
 from src.services.exceptions import NoWorkoutsError
 
 
-async def get_select_workout_keyboard(
+async def create_select_workout_keyboard(
     user_id: int | str,
     workout_service: WorkoutServiceProto,
     buttons_per_row: int,
@@ -68,7 +68,7 @@ async def get_select_workout_keyboard(
     )
 
 
-async def get_start_workout_keyboard() -> InlineKeyboardMarkup:
+async def create_start_workout_keyboard() -> InlineKeyboardMarkup:
     btns = [
         [
             InlineKeyboardButton(
@@ -90,7 +90,7 @@ async def get_start_workout_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-async def get_next_exercise_keyboard() -> InlineKeyboardMarkup:
+async def create_next_exercise_keyboard() -> InlineKeyboardMarkup:
     btns = [
         [
             InlineKeyboardButton(
@@ -104,3 +104,37 @@ async def get_next_exercise_keyboard() -> InlineKeyboardMarkup:
         row_width=1,
         inline_keyboard=btns,
     )
+
+
+async def create_pause_workout_keyboard() -> InlineKeyboardMarkup:
+    btns = [
+        [
+            InlineKeyboardButton(
+                text="⏸️ Приостановить",
+                callback_data=PauseWorkoutCallback().pack(),
+            )
+        ]
+    ]
+
+    return InlineKeyboardMarkup(
+        row_width=1,
+        inline_keyboard=btns,
+    )
+
+
+async def create_resume_workout_keyboard() -> InlineKeyboardMarkup:
+    btns = [
+        [
+            InlineKeyboardButton(
+                text="▶️ Продолжить",
+                callback_data=ResumeWorkoutCallback().pack(),
+            )
+        ]
+    ]
+
+    return InlineKeyboardMarkup(
+        row_width=1,
+        inline_keyboard=btns,
+    )
+
+

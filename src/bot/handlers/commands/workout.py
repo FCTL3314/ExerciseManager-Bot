@@ -90,4 +90,4 @@ async def command_start_workout_handler(
         limit=settings.pagination.workout.workouts_keyboard_paginate_by,
         buttons_per_row=settings.pagination.workout.workouts_keyboard_buttons_per_row,
     )
-    await state.set_state(StartWorkoutStates.waiting_for_workout_selection)
+    await state.set_state(StartWorkoutStates.selecting_workout)

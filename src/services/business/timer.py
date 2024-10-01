@@ -6,6 +6,7 @@ async def run_timer(
     seconds: int,
     on_tick: Callable[..., Awaitable[Any]],
     should_continue: Callable[..., Awaitable[bool]] | None = None,
+    should_pause: Callable[..., Awaitable[bool]] | None = None,
     previous_tick_result: Any = None,
 ) -> Any:
     for i, second in enumerate(range(seconds, -1, -1)):
@@ -14,6 +15,10 @@ async def run_timer(
             "second": second,
             "previous_tick_result": previous_tick_result,
         }
+
+        if should_pause is not None:
+            while await should_pause(**kwargs):
+                await asyncio.sleep(1)
 
         if should_continue is not None and not await should_continue(**kwargs):
             break

@@ -6,11 +6,15 @@ from src.bot.callbacks import (
     WorkoutsSelectCallback,
     WorkoutsPaginationCallback,
     StartWorkoutCallback,
+    PauseWorkoutCallback,
+    ResumeWorkoutCallback,
 )
 from src.bot.enums import MessageAction
 from src.bot.handlers.callback import router
 from src.bot.keyboards.inline.workouts import (
-    get_start_workout_keyboard,
+    create_start_workout_keyboard,
+    create_pause_workout_keyboard,
+    create_resume_workout_keyboard,
 )
 from src.bot.services.exercise import handle_workout_exercise
 from src.bot.services.shortcuts.message_templates import (
@@ -68,7 +72,7 @@ async def process_add_exercise_workout_selection(
 
 
 @router.callback_query(
-    StartWorkoutStates.waiting_for_workout_selection, WorkoutsSelectCallback.filter()
+    StartWorkoutStates.selecting_workout, WorkoutsSelectCallback.filter()
 )
 async def process_start_workout_selection(
     callback_query: CallbackQuery,
@@ -86,24 +90,50 @@ async def process_start_workout_selection(
     workout_state = await workout_service.create_serialized_workout_state(workout)
 
     await state.update_data(**workout_state.model_dump())
-    await state.set_state(StartWorkoutStates.doing_workout)
+    await state.set_state(StartWorkoutStates.workout_in_progress)
 
     await callback_query.message.edit_text(
         f"💪 Вы выбрали тренировку: {html.bold(workout.name)}!\n\n"
         f"🔹 Тренировка состоит из {workout.exercises_count} упражнений.\n"
         f"🔹 Приблизительное время тренировки - {workout.get_humanized_workout_duration("ru")}.",  # TODO: Change to i18n.current_locale
-        reply_markup=await get_start_workout_keyboard(),
+        reply_markup=await create_start_workout_keyboard(),
     )
     await callback_query.answer()
 
 
-@router.callback_query(StartWorkoutStates.doing_workout, StartWorkoutCallback.filter())
+@router.callback_query(
+    StartWorkoutStates.workout_in_progress, StartWorkoutCallback.filter()
+)
 async def process_start_workout(
     callback_query: CallbackQuery,
     callback_data: StartWorkoutCallback,
     state: FSMContext,
     workout_service: WorkoutServiceProto,
 ) -> None:
-    await callback_query.answer()
     await state.update_data(manual_mode_enabled=callback_data.manual_mode_enabled)
+    await callback_query.answer()
     await handle_workout_exercise(callback_query.message, workout_service, state)
+
+
+@router.callback_query(
+    StartWorkoutStates.workout_in_progress, PauseWorkoutCallback.filter()
+)
+async def process_pause_workout(
+    callback_query: CallbackQuery, state: FSMContext
+) -> None:
+    await state.set_state(StartWorkoutStates.paused)
+    await callback_query.message.edit_reply_markup(
+        reply_markup=await create_resume_workout_keyboard()
+    )
+    await callback_query.answer()
+
+
+@router.callback_query(StartWorkoutStates.paused, ResumeWorkoutCallback.filter())
+async def process_resume_workout(
+    callback_query: CallbackQuery, state: FSMContext
+) -> None:
+    await state.set_state(StartWorkoutStates.workout_in_progress)
+    await callback_query.message.edit_reply_markup(
+        reply_markup=await create_pause_workout_keyboard()
+    )
+    await callback_query.answer()

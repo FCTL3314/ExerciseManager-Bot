@@ -7,7 +7,7 @@ class WorkoutAddingStates(StatesGroup):
 
 
 class ExerciseAddingStates(StatesGroup):
-    waiting_for_workout_selection = State()
+    waiting_for_workout_selection = State()  # TODO: Rename states
     waiting_for_name_input = State()
     waiting_for_description_input = State()
     waiting_for_image_input = State()
@@ -16,5 +16,6 @@ class ExerciseAddingStates(StatesGroup):
 
 
 class StartWorkoutStates(StatesGroup):
-    waiting_for_workout_selection = State()
-    doing_workout = State()
+    selecting_workout = State()
+    workout_in_progress = State()
+    paused = State()

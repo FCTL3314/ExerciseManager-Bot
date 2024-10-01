@@ -2,7 +2,7 @@ from aiogram.types import Message
 
 from src.bot.enums import MessageAction
 from src.bot.keyboards.inline.workouts import (
-    get_select_workout_keyboard,
+    create_select_workout_keyboard,
 )
 from src.services.business.workouts import WorkoutServiceProto
 from src.services.exceptions import NoWorkoutsError
@@ -26,7 +26,7 @@ async def send_select_workout_keyboard(
     if message_action == MessageAction.edit and show_loading_message:
         loading_message = await message.edit_text(loading_text)
 
-    keyboard = await get_select_workout_keyboard(
+    keyboard = await create_select_workout_keyboard(
         user_id=user_id,
         workout_service=workout_service,
         buttons_per_row=buttons_per_row,

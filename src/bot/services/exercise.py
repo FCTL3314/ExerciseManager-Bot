@@ -4,7 +4,10 @@ from aiogram import html
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
-from src.bot.keyboards.inline.workouts import get_next_exercise_keyboard
+from src.bot.keyboards.inline.workouts import (
+    create_next_exercise_keyboard,
+    create_pause_workout_keyboard,
+)
 from src.bot.services.messages import send_file_by_url
 from src.bot.services.shortcuts.message_templates import (
     REST_PERIOD_TIMER_MESSAGE,
@@ -53,12 +56,14 @@ async def handle_workout_exercise(
         break_seconds,
         on_tick=await get_on_tick(message, REST_PERIOD_TIMER_MESSAGE),
         should_continue=await get_should_continue(state),
+        should_pause=await get_should_pause(state),
     )
 
     timer_message: Message = await run_timer(
         int(workout_exercise.exercise.duration.total_seconds()),
         on_tick=await get_on_tick(message, WORKOUT_EXERCISE_TIMER_MESSAGE),
         should_continue=await get_should_continue(state),
+        should_pause=await get_should_pause(state),
         previous_tick_result=timer_message,
     )
 
@@ -76,7 +81,7 @@ async def handle_workout_exercise(
     )
 
     if workout_settings.manual_mode_enabled:
-        keyboard = await get_next_exercise_keyboard()
+        keyboard = await create_next_exercise_keyboard()
         await timer_message.edit_reply_markup(reply_markup=keyboard)
     else:
         await handle_workout_exercise(message, workout_service, state)
@@ -91,11 +96,13 @@ async def get_on_tick(
     ) -> Any:
         if previous_tick_result is None:
             return await message.answer(
-                message_template.format(seconds_left=html.bold(second))
+                message_template.format(seconds_left=html.bold(second)),
+                reply_markup=await create_pause_workout_keyboard(),
             )
 
         return await previous_tick_result.edit_text(
-            message_template.format(seconds_left=html.bold(second))
+            message_template.format(seconds_left=html.bold(second)),
+            reply_markup=previous_tick_result.reply_markup,
         )
 
     return on_tick
@@ -103,6 +110,12 @@ async def get_on_tick(
 
 async def get_should_continue(state: FSMContext) -> Callable[..., Awaitable[Any]]:
     async def should_continue(*args, **kwargs) -> bool:
-        return await state.get_state() == StartWorkoutStates.doing_workout
+        return await state.get_state() == StartWorkoutStates.workout_in_progress
 
     return should_continue
+
+async def get_should_pause(state: FSMContext) -> Callable[..., Awaitable[Any]]:
+    async def should_pause(*args, **kwargs) -> bool:
+        return await state.get_state() == StartWorkoutStates.paused
+
+    return should_pause
