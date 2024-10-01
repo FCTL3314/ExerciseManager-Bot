@@ -1,42 +1,45 @@
 import mimetypes
-from collections.abc import Callable
 
 from aiogram.types import Message
 
 
-async def get_send_method_by_mimetype(mimetype: str | None) -> Callable:
-    if mimetype is None:
-        return Message.answer_document
+def get_file_type_by_mimetype(mimetype: str) -> str:
+    if not isinstance(mimetype, str):
+        raise TypeError("mimetype must be a string")
 
-    if mimetype.startswith("image/gif"):
-        return Message.answer_animation
-    elif mimetype == "image/":
-        return Message.answer_photo
+    if mimetype == "image/gif":
+        return "animation"
+    elif mimetype.startswith("image/"):
+        return "photo"
     elif mimetype.startswith("video/"):
-        return Message.answer_video
+        return "video"
     elif mimetype.startswith("audio/"):
-        return Message.answer_audio
+        return "audio"
     else:
-        return Message.answer_document
+        return "document"
 
 
-async def get_send_method_by_url(url: str) -> Callable:
-    mimetype = mimetypes.guess_type(url)[0]
-    return await get_send_method_by_mimetype(mimetype)
+def get_file_type_by_url(url: str) -> str:
+    mimetype, _ = mimetypes.guess_type(url)
+
+    if mimetype is None:
+        return "text"
+
+    return get_file_type_by_mimetype(mimetype)
 
 
-async def get_file_arg_name_by_method(method: Callable) -> str:
-    return {
-        Message.answer_photo.__name__: "photo",
-        Message.answer_animation.__name__: "animation",
-        Message.answer_video.__name__: "video",
-        Message.answer_audio.__name__: "audio",
-        Message.answer_document.__name__: "document",
-    }[method.__name__]
+async def send_file_by_url(message: Message, url: str, **kwargs) -> Message:
+    file_type = get_file_type_by_url(url)
 
-
-async def send_file_by_url(message: Message, url: str, *args, **kwargs):
-    method = await get_send_method_by_url(url)
-    file_arg_name = await get_file_arg_name_by_method(method)
-    kwargs.update({file_arg_name: url})
-    return await method(message, *args, **kwargs)
+    if file_type == "photo":
+        return await message.answer_photo(photo=url, **kwargs)
+    elif file_type == "animation":
+        return await message.answer_animation(animation=url, **kwargs)
+    elif file_type == "video":
+        return await message.answer_video(video=url, **kwargs)
+    elif file_type == "audio":
+        return await message.answer_audio(audio=url, **kwargs)
+    elif file_type == "document":
+        return await message.answer_document(document=url, **kwargs)
+    else:
+        return await message.answer(text=url, **kwargs)
