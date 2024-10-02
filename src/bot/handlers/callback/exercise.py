@@ -1,3 +1,5 @@
+import asyncio
+
 from aiogram import html
 from aiogram.filters import StateFilter
 from aiogram.fsm.context import FSMContext
@@ -24,7 +26,9 @@ async def process_next_exercise(
     state: FSMContext,
     workout_service: WorkoutServiceProto,
 ) -> None:
-    await handle_workout_exercise(callback_query.message, workout_service, state)
+    asyncio.create_task(
+        handle_workout_exercise(callback_query.message, workout_service, state)
+    )
     await callback_query.answer()
 
 
