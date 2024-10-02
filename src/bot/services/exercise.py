@@ -1,6 +1,7 @@
 from typing import Callable, Awaitable, Any
 
 from aiogram import html
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
@@ -8,7 +9,7 @@ from src.bot.keyboards.inline.workouts import (
     create_next_exercise_keyboard,
     create_pause_workout_keyboard,
 )
-from src.bot.services.messages import send_file_by_url
+from src.bot.services.messages import send_message_by_file_type
 from src.bot.services.shortcuts.message_templates import (
     REST_PERIOD_TIMER_MESSAGE,
     WORKOUT_EXERCISE_TIMER_MESSAGE,
@@ -44,11 +45,14 @@ async def handle_workout_exercise(
     )
 
     if workout_exercise.exercise.image:
-        await send_file_by_url(
-            message,
-            workout_exercise.exercise.image,
-            caption=exercise_text,
-        )
+        try:
+            await send_message_by_file_type(
+                message,
+                workout_exercise.exercise.image,
+                caption=exercise_text,
+            )
+        except TelegramBadRequest:
+            await message.answer(exercise_text)
     else:
         await message.answer(exercise_text)
 

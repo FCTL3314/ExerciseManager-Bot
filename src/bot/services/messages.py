@@ -19,27 +19,32 @@ def get_file_type_by_mimetype(mimetype: str) -> str:
         return "document"
 
 
-def get_file_type_by_url(url: str) -> str:
+def get_message_type_by_url(url: str) -> str | None:
     mimetype, _ = mimetypes.guess_type(url)
 
     if mimetype is None:
-        return "text"
+        return None
 
     return get_file_type_by_mimetype(mimetype)
 
 
-async def send_file_by_url(message: Message, url: str, **kwargs) -> Message:
-    file_type = get_file_type_by_url(url)
+async def send_message_by_file_type(message: Message, url: str, **kwargs) -> Message:
+    message_type = get_message_type_by_url(url)
 
-    if file_type == "photo":
-        return await message.answer_photo(photo=url, **kwargs)
-    elif file_type == "animation":
-        return await message.answer_animation(animation=url, **kwargs)
-    elif file_type == "video":
-        return await message.answer_video(video=url, **kwargs)
-    elif file_type == "audio":
-        return await message.answer_audio(audio=url, **kwargs)
-    elif file_type == "document":
-        return await message.answer_document(document=url, **kwargs)
-    else:
-        return await message.answer(text=url, **kwargs)
+    if message_type is None:
+        message_type = "text"
+
+    match message_type:
+        case "photo":
+            return await message.answer_photo(photo=url, **kwargs)
+        case "animation":
+            return await message.answer_animation(animation=url, **kwargs)
+        case "video":
+            return await message.answer_video(video=url, **kwargs)
+        case "audio":
+            return await message.answer_audio(audio=url, **kwargs)
+        case "document":
+            return await message.answer_document(document=url, **kwargs)
+        case _:
+            return await message.answer(text=url, **kwargs)
+
