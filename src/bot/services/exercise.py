@@ -18,6 +18,7 @@ from src.bot.services.shortcuts.message_templates import (
     EXERCISE_DESCRIPTION_MESSAGE,
     EXERCISE_COMPLETED_MESSAGE,
     WORKOUT_COMPLETED_MESSAGE,
+    FAILED_TO_SEND_EXERCISE_IMAGE_MESSAGE,
 )
 from src.bot.states.workout import StartWorkoutStates
 from src.services.business.timer import run_timer
@@ -54,6 +55,7 @@ async def handle_workout_exercise(
                 caption=exercise_text,
             )
         except TelegramBadRequest:
+            await message.answer(FAILED_TO_SEND_EXERCISE_IMAGE_MESSAGE)
             await message.answer(exercise_text)
     else:
         await message.answer(exercise_text)
