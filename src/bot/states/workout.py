@@ -19,3 +19,4 @@ class StartWorkoutStates(StatesGroup):
     selecting_workout = State()
     workout_in_progress = State()
     paused = State()
+    skipping_exercise = State()

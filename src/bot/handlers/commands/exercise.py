@@ -4,8 +4,8 @@ from aiogram.types import Message
 
 from src.bot.handlers.commands import router
 from src.bot.keyboards.inline.exercise import (
-    get_skip_exercise_description_keyboard,
-    get_skip_exercise_image_keyboard,
+    create_skip_exercise_description_keyboard,
+    create_skip_exercise_image_keyboard,
 )
 from src.bot.services.shortcuts.commands import (
     ADD_EXERCISE_COMMAND,
@@ -68,7 +68,7 @@ async def process_add_exercise_name(
     await message.answer(
         f"Отлично! ✅\n\n"
         f"🔹 {html.bold("Шаг 2:")} Пожалуйста, опишите ваше упражнение (это необязательно, но поможет вам лучше организоваться):",
-        reply_markup=await get_skip_exercise_description_keyboard(),
+        reply_markup=await create_skip_exercise_description_keyboard(),
     )
 
 
@@ -82,7 +82,7 @@ async def process_add_exercise_description(message: Message, state: FSMContext) 
         f"Отлично! ✅\n\n"
         f"{html.bold('Шаг 3:')} Теперь введите URL изображения. "
         f"Если у вас нет изображения, просто нажмите {html.bold("Пропустить")}.",
-        reply_markup=await get_skip_exercise_image_keyboard(),
+        reply_markup=await create_skip_exercise_image_keyboard(),
     )
 
 

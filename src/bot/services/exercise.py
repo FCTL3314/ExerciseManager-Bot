@@ -5,9 +5,11 @@ from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 
+from src.bot.keyboards.inline.exercise import (
+    create_active_workout_keyboard,
+)
 from src.bot.keyboards.inline.workouts import (
     create_next_exercise_keyboard,
-    create_pause_workout_keyboard,
 )
 from src.bot.services.messages import send_message_by_file_type
 from src.bot.services.shortcuts.message_templates import (
@@ -58,14 +60,14 @@ async def handle_workout_exercise(
 
     timer_message: Message = await run_timer(
         break_seconds,
-        on_tick=await get_on_tick(message, REST_PERIOD_TIMER_MESSAGE),
+        on_tick=await get_on_tick(message, state, REST_PERIOD_TIMER_MESSAGE),
         should_continue=await get_should_continue(state),
         should_pause=await get_should_pause(state),
     )
 
     timer_message: Message = await run_timer(
         int(workout_exercise.exercise.duration.total_seconds()),
-        on_tick=await get_on_tick(message, WORKOUT_EXERCISE_TIMER_MESSAGE),
+        on_tick=await get_on_tick(message, state, WORKOUT_EXERCISE_TIMER_MESSAGE),
         should_continue=await get_should_continue(state),
         should_pause=await get_should_pause(state),
         previous_tick_result=timer_message,
@@ -85,14 +87,16 @@ async def handle_workout_exercise(
     )
 
     if workout_settings.manual_mode_enabled:
-        keyboard = await create_next_exercise_keyboard()
-        await timer_message.edit_reply_markup(reply_markup=keyboard)
+        await timer_message.edit_reply_markup(
+            reply_markup=await create_next_exercise_keyboard()
+        )
     else:
         await handle_workout_exercise(message, workout_service, state)
 
 
 async def get_on_tick(
     message: Message,
+    state: FSMContext,
     message_template: str,
 ) -> Callable[..., Awaitable[Any]]:
     async def on_tick(
@@ -101,7 +105,7 @@ async def get_on_tick(
         if previous_tick_result is None:
             return await message.answer(
                 message_template.format(seconds_left=html.bold(second)),
-                reply_markup=await create_pause_workout_keyboard(),
+                reply_markup=await create_active_workout_keyboard(),
             )
 
         return await previous_tick_result.edit_text(
@@ -109,11 +113,16 @@ async def get_on_tick(
             reply_markup=previous_tick_result.reply_markup,
         )
 
+    if await state.get_state() == StartWorkoutStates.skipping_exercise:
+        await state.set_state(StartWorkoutStates.workout_in_progress)
+
     return on_tick
 
 
 async def get_should_continue(state: FSMContext) -> Callable[..., Awaitable[Any]]:
     async def should_continue(*args, **kwargs) -> bool:
+        if await state.get_state() == StartWorkoutStates.skipping_exercise:
+            return False
         return await state.get_state() == StartWorkoutStates.workout_in_progress
 
     return should_continue
@@ -121,6 +130,8 @@ async def get_should_continue(state: FSMContext) -> Callable[..., Awaitable[Any]
 
 async def get_should_pause(state: FSMContext) -> Callable[..., Awaitable[Any]]:
     async def should_pause(*args, **kwargs) -> bool:
+        if await state.get_state() == StartWorkoutStates.skipping_exercise:
+            return False
         return await state.get_state() == StartWorkoutStates.paused
 
     return should_pause

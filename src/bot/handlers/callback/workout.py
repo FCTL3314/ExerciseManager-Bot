@@ -13,10 +13,12 @@ from src.bot.callbacks import (
 )
 from src.bot.enums import MessageAction
 from src.bot.handlers.callback import router
+from src.bot.keyboards.inline.exercise import (
+    create_active_workout_keyboard,
+    create_paused_workout_keyboard,
+)
 from src.bot.keyboards.inline.workouts import (
     create_start_workout_keyboard,
-    create_pause_workout_keyboard,
-    create_resume_workout_keyboard,
 )
 from src.bot.services.exercise import handle_workout_exercise
 from src.bot.services.shortcuts.message_templates import (
@@ -127,7 +129,7 @@ async def process_pause_workout(
 ) -> None:
     await state.set_state(StartWorkoutStates.paused)
     await callback_query.message.edit_reply_markup(
-        reply_markup=await create_resume_workout_keyboard()
+        reply_markup=await create_paused_workout_keyboard()
     )
     await callback_query.answer()
 
@@ -138,6 +140,6 @@ async def process_resume_workout(
 ) -> None:
     await state.set_state(StartWorkoutStates.workout_in_progress)
     await callback_query.message.edit_reply_markup(
-        reply_markup=await create_pause_workout_keyboard()
+        reply_markup=await create_active_workout_keyboard()
     )
     await callback_query.answer()
