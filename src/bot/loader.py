@@ -43,7 +43,10 @@ class BotLoader(IBotLoader):  # TODO: Try to move some methods to lifecycle
     async def _create_bot(self) -> ABot:
         return ABot(
             token=self._config.env.bot.token,
-            default=DefaultBotProperties(parse_mode=ParseMode.HTML),
+            default=DefaultBotProperties(
+                parse_mode=ParseMode.HTML,
+                disable_notification=True,
+            ),
         )
 
     async def _create_storage(self) -> RedisStorage:

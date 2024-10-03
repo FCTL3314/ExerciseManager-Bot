@@ -60,28 +60,30 @@ async def run_timer(
     state: FSMContext,
     stop_states: Iterable[StatesGroup] = None,
     pause_states: Iterable[StatesGroup] = None,
+    on_stop: Callable[[int, int, Any], ...] = lambda: ...,
 ) -> Any:
     previous_tick_result = None
     remaining_seconds = seconds
 
     while remaining_seconds >= 0:
-        start_time = time.monotonic()
+        kwargs = {
+            "iteration": seconds - remaining_seconds,
+            "second": remaining_seconds,
+            "previous_tick_result": previous_tick_result,
+        }
+
         current_state = await state.get_state()
 
         if stop_states and current_state in stop_states:
+            await on_stop(**kwargs)
             return previous_tick_result
 
         if pause_states and current_state in pause_states:
             while await state.get_state() in pause_states:
                 await asyncio.sleep(1)
 
-        previous_tick_result = await on_tick(
-            **{
-                "iteration": seconds - remaining_seconds,
-                "second": remaining_seconds,
-                "previous_tick_result": previous_tick_result,
-            }
-        )
+        start_time = time.monotonic()
+        previous_tick_result = await on_tick(**kwargs)
         end_time = time.monotonic()
 
         elapsed_time = end_time - start_time
@@ -89,9 +91,12 @@ async def run_timer(
 
         remaining_sleep_time = 1 - (elapsed_time % 1)
 
+        print(remaining_sleep_time)
+
         if remaining_sleep_time > 0 and remaining_seconds > 0:
             await asyncio.sleep(remaining_sleep_time)
 
         remaining_seconds -= 1
 
+    await on_stop(**kwargs)
     return previous_tick_result
