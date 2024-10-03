@@ -1,3 +1,4 @@
+import asyncio
 from typing import Callable, Awaitable, Any
 
 from aiogram import html
@@ -11,7 +12,7 @@ from src.bot.keyboards.inline.exercise import (
 from src.bot.keyboards.inline.workouts import (
     create_next_exercise_keyboard,
 )
-from src.bot.services.messages import send_message_by_file_type
+from src.bot.services.messages import send_message_by_file_type, run_timer
 from src.bot.services.shortcuts.message_templates import (
     REST_PERIOD_TIMER_MESSAGE,
     WORKOUT_EXERCISE_TIMER_MESSAGE,
@@ -21,7 +22,6 @@ from src.bot.services.shortcuts.message_templates import (
     FAILED_TO_SEND_EXERCISE_IMAGE_MESSAGE,
 )
 from src.bot.states.workout import StartWorkoutStates
-from src.services.business.timer import run_timer
 from src.services.business.workouts import WorkoutServiceProto
 
 
@@ -63,16 +63,19 @@ async def handle_workout_exercise(
     timer_message: Message = await run_timer(
         break_seconds,
         on_tick=await get_on_tick(message, state, REST_PERIOD_TIMER_MESSAGE),
-        should_continue=await get_should_continue(state),
-        should_pause=await get_should_pause(state),
+        state=state,
+        stop_states=(StartWorkoutStates.skipping_exercise, None),
+        pause_states=(StartWorkoutStates.paused,),
     )
 
     timer_message: Message = await run_timer(
         int(workout_exercise.exercise.duration.total_seconds()),
-        on_tick=await get_on_tick(message, state, WORKOUT_EXERCISE_TIMER_MESSAGE),
-        should_continue=await get_should_continue(state),
-        should_pause=await get_should_pause(state),
-        previous_tick_result=timer_message,
+        on_tick=await get_on_tick(
+            message, state, WORKOUT_EXERCISE_TIMER_MESSAGE, timer_message
+        ),
+        state=state,
+        stop_states=(StartWorkoutStates.skipping_exercise, None),
+        pause_states=(StartWorkoutStates.paused,),
     )
 
     await timer_message.edit_text(
@@ -100,40 +103,28 @@ async def get_on_tick(
     message: Message,
     state: FSMContext,
     message_template: str,
+    previous_message: Message | None = None,
 ) -> Callable[..., Awaitable[Any]]:
     async def on_tick(
         second: int, previous_tick_result: Message, *args, **kwargs
     ) -> Any:
-        if previous_tick_result is None:
+        _previous_message = previous_tick_result
+
+        if _previous_message is None:
+            _previous_message = previous_message
+
+        if _previous_message is None:
             return await message.answer(
                 message_template.format(seconds_left=html.bold(second)),
                 reply_markup=await create_active_workout_keyboard(),
             )
 
-        return await previous_tick_result.edit_text(
+        return await _previous_message.edit_text(
             message_template.format(seconds_left=html.bold(second)),
-            reply_markup=previous_tick_result.reply_markup,
+            reply_markup=_previous_message.reply_markup,
         )
 
     if await state.get_state() == StartWorkoutStates.skipping_exercise:
         await state.set_state(StartWorkoutStates.workout_in_progress)
 
     return on_tick
-
-
-async def get_should_continue(state: FSMContext) -> Callable[..., Awaitable[Any]]:
-    async def should_continue(*args, **kwargs) -> bool:
-        if await state.get_state() == StartWorkoutStates.skipping_exercise:
-            return False
-        return await state.get_state() == StartWorkoutStates.workout_in_progress
-
-    return should_continue
-
-
-async def get_should_pause(state: FSMContext) -> Callable[..., Awaitable[Any]]:
-    async def should_pause(*args, **kwargs) -> bool:
-        if await state.get_state() == StartWorkoutStates.skipping_exercise:
-            return False
-        return await state.get_state() == StartWorkoutStates.paused
-
-    return should_pause
