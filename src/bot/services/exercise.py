@@ -61,23 +61,26 @@ async def handle_workout_exercise(
 
     timer_message: Message = await run_timer(
         break_seconds,
-        on_tick=await get_on_tick(message, state, REST_PERIOD_TIMER_MESSAGE),
+        on_tick=await get_on_tick(message, REST_PERIOD_TIMER_MESSAGE),
         on_stop=await get_on_stop(state),
         state=state,
-        stop_states=(StartWorkoutStates.skipping_exercise,),
+        stop_states=(StartWorkoutStates.skipping_exercise, None),
         pause_states=(StartWorkoutStates.paused,),
     )
 
     timer_message: Message = await run_timer(
         int(workout_exercise.exercise.duration.total_seconds()),
         on_tick=await get_on_tick(
-            message, state, WORKOUT_EXERCISE_TIMER_MESSAGE, timer_message
+            message, WORKOUT_EXERCISE_TIMER_MESSAGE, timer_message
         ),
         on_stop=await get_on_stop(state),
         state=state,
-        stop_states=(StartWorkoutStates.skipping_exercise,),
+        stop_states=(StartWorkoutStates.skipping_exercise, None),
         pause_states=(StartWorkoutStates.paused,),
     )
+
+    if await state.get_state() is None:
+        return
 
     await timer_message.edit_text(
         EXERCISE_COMPLETED_MESSAGE.format(name=workout_exercise.exercise.name)
@@ -102,7 +105,6 @@ async def handle_workout_exercise(
 
 async def get_on_tick(
     message: Message,
-    state: FSMContext,
     message_template: str,
     previous_message: Message | None = None,
 ) -> Callable[..., Awaitable[Any]]:
@@ -125,15 +127,15 @@ async def get_on_tick(
             reply_markup=_previous_message.reply_markup,
         )
 
-    if await state.get_state() == StartWorkoutStates.skipping_exercise:
-        await state.set_state(StartWorkoutStates.workout_in_progress)
-
     return on_tick
 
 
 async def get_on_stop(state: FSMContext) -> Callable[..., Awaitable[None]]:
     async def on_stop(*args, **kwargs) -> None:
-        if await state.get_state() != StartWorkoutStates.workout_in_progress:
+        if await state.get_state() in (
+            StartWorkoutStates.skipping_exercise,
+            StartWorkoutStates.paused,
+        ):
             await state.set_state(StartWorkoutStates.workout_in_progress)
 
     return on_stop

@@ -62,12 +62,14 @@ async def run_timer(
     pause_states: Iterable[StatesGroup] = None,
     on_stop: Callable[[int, int, Any], ...] = lambda: ...,
 ) -> Any:
+    if seconds <= 0:
+        raise ValueError("seconds must be a positive integer")
+
     previous_tick_result = None
     remaining_seconds = seconds
 
     while remaining_seconds >= 0:
         kwargs = {
-            "iteration": seconds - remaining_seconds,
             "second": remaining_seconds,
             "previous_tick_result": previous_tick_result,
         }
@@ -91,12 +93,10 @@ async def run_timer(
 
         remaining_sleep_time = 1 - (elapsed_time % 1)
 
-        print(remaining_sleep_time)
-
         if remaining_sleep_time > 0 and remaining_seconds > 0:
             await asyncio.sleep(remaining_sleep_time)
 
         remaining_seconds -= 1
 
-    await on_stop(**kwargs)
+    await on_stop(**kwargs)  # noqa
     return previous_tick_result
