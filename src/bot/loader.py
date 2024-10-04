@@ -26,7 +26,7 @@ class IBotLoader(ABC):
     async def load(self) -> Bot: ...
 
 
-class BotLoader(IBotLoader):  # TODO: Try to move some methods to lifecycle
+class BotLoader(IBotLoader):
     def __init__(
         self,
         config: Config,
@@ -59,38 +59,10 @@ class BotLoader(IBotLoader):  # TODO: Try to move some methods to lifecycle
         dp.include_router(base_router)
         return dp
 
-    async def _init_middlewares(self, dp: Dispatcher) -> None:
-        dp.update.middleware(ConfigMiddleware(self._config))
-        dp.update.middleware(ServicesMiddleware(self._services))
-        dp.update.middleware(SimpleI18nMiddleware(self._i18n))
-        dp.update.outer_middleware(RetryOnRateLimitsMiddleware())
-        dp.update.outer_middleware(LoggingMiddleware(self._logger_group.general))
-        dp.update.outer_middleware(ClearStateOnErrorMiddleware())
-        dp.message.outer_middleware(
-            AuthCheckMiddleware(self._commands_group, self._services.auth)
-        )
-
-    async def _setup_webhook(self, bot: ABot) -> None:
-        existed_webhook = await bot.get_webhook_info()
-        current_webhook_url = self._config.env.bot.build_webhook_url_with_token(
-            self._config.env.bot.token
-        )
-
-        if existed_webhook.url == current_webhook_url:
-            return
-
-        await bot.set_webhook(
-            current_webhook_url,
-            secret_token=self._config.env.bot.webhook_secret,
-        )
-
     async def load(self) -> Bot:
         bot = await self._create_bot()
         storage = await self._create_storage()
         dp = await self._create_dispatcher(storage)
-
-        await self._init_middlewares(dp)
-        await self._setup_webhook(bot)
 
         return Bot(
             client=bot,

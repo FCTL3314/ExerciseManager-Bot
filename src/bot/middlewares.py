@@ -1,17 +1,19 @@
 import asyncio
 from logging import Logger
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, TYPE_CHECKING
 
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
 from aiogram.exceptions import TelegramRetryAfter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import TelegramObject
 
-from src.bootstrap.types import Services
 from src.bot.services.shortcuts.commands import CommandsGroup
 from src.config import Config
 from src.services.business import AuthServiceProto
 from src.services.business.exceptions import UnauthorizedError
+
+if TYPE_CHECKING:
+    from src.bootstrap.types import Services
 
 
 class ConfigMiddleware(BaseMiddleware):
@@ -47,7 +49,7 @@ class LoggingMiddleware(BaseMiddleware):
 
 
 class ServicesMiddleware(BaseMiddleware):
-    def __init__(self, services: Services) -> None:
+    def __init__(self, services: "Services") -> None:
         super().__init__()
         self.services = services
 

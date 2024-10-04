@@ -140,6 +140,7 @@ class AppStarter:
         return App(
             config=config,
             storage=storage,
+            i18n=i18n,
             logger_group=logger_group,
             services=services,
             bot=bot,
@@ -148,12 +149,7 @@ class AppStarter:
     async def start_app(self) -> None:
         app = await self._init_app()
         if app.config.env.bot.use_webhook:
-            server_runner = ServerRunner(
-                app.bot,
-                app.services,
-                app.logger_group,
-                app.config,
-            )
+            server_runner = ServerRunner(app)
             await server_runner.run_server(asyncio.get_event_loop())
         else:
             await app.bot.client.delete_webhook()
