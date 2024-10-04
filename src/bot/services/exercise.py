@@ -1,6 +1,7 @@
+# TODO: Simplify module
+
 from typing import Callable, Awaitable, Any
 
-from aiogram import html
 from aiogram.exceptions import TelegramBadRequest
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
@@ -13,14 +14,15 @@ from src.bot.keyboards.inline.workouts import (
 )
 from src.bot.services.messages import send_message_by_file_type, run_timer
 from src.bot.services.shortcuts.message_templates import (
-    REST_PERIOD_TIMER_MESSAGE,
-    WORKOUT_EXERCISE_TIMER_MESSAGE,
     EXERCISE_DESCRIPTION_MESSAGE,
     EXERCISE_COMPLETED_MESSAGE,
     WORKOUT_COMPLETED_MESSAGE,
     FAILED_TO_SEND_EXERCISE_IMAGE_MESSAGE,
+    get_workout_exercise_progress_bar,
+    WORKOUT_REST_TIMER_MESSAGE,
 )
 from src.bot.states.workout import StartWorkoutStates
+from src.constants import MIN_TIMER_MESSAGE_SECONDS_INTERVAL
 from src.services.business.workouts import WorkoutServiceProto
 
 
@@ -61,17 +63,25 @@ async def handle_workout_exercise(
 
     timer_message: Message = await run_timer(
         break_seconds,
-        on_tick=await get_on_tick(message, REST_PERIOD_TIMER_MESSAGE),
+        on_tick=await get_on_tick(
+            message,
+            break_seconds,
+            message_template=WORKOUT_REST_TIMER_MESSAGE,
+        ),
         on_stop=await get_on_stop(state),
         state=state,
         stop_states=(StartWorkoutStates.skipping_exercise, None),
         pause_states=(StartWorkoutStates.paused,),
     )
 
+    exercise_duration = int(workout_exercise.exercise.duration.total_seconds())
     timer_message: Message = await run_timer(
-        int(workout_exercise.exercise.duration.total_seconds()),
+        exercise_duration,
         on_tick=await get_on_tick(
-            message, WORKOUT_EXERCISE_TIMER_MESSAGE, timer_message
+            message,
+            exercise_duration,
+            progress_bar_generator=get_workout_exercise_progress_bar,
+            previous_message=timer_message,
         ),
         on_stop=await get_on_stop(state),
         state=state,
@@ -105,25 +115,42 @@ async def handle_workout_exercise(
 
 async def get_on_tick(
     message: Message,
-    message_template: str,
+    total_seconds: int,
+    message_template: str = None,
+    progress_bar_generator: Callable[[int], str] | None = None,
     previous_message: Message | None = None,
 ) -> Callable[..., Awaitable[Any]]:
     async def on_tick(
-        second: int, previous_tick_result: Message, *args, **kwargs
+        second: int, previous_tick_result: Message, iteration_num: int, *args, **kwargs
     ) -> Any:
         _previous_message = previous_tick_result
+
+        if iteration_num != 0 and second % MIN_TIMER_MESSAGE_SECONDS_INTERVAL != 0:
+            return _previous_message
+
+        # TODO: Use pydantic models property for simplification
+        if progress_bar_generator is not None:
+            progress = int(((total_seconds - second) / total_seconds) * 100)
+            progress = min(max(progress, 0), 100)
+
+            text = progress_bar_generator(progress)
+        else:
+            text = message_template.format(seconds_left=second)
 
         if _previous_message is None:
             _previous_message = previous_message
 
         if _previous_message is None:
             return await message.answer(
-                message_template.format(seconds_left=html.bold(second)),
+                text,
                 reply_markup=await create_active_workout_keyboard(),
             )
 
+        if _previous_message.text == text:
+            return _previous_message
+
         return await _previous_message.edit_text(
-            message_template.format(seconds_left=html.bold(second)),
+            text,
             reply_markup=_previous_message.reply_markup,
         )
 

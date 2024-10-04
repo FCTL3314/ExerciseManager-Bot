@@ -98,8 +98,8 @@ async def process_start_workout_selection(
 
     await callback_query.message.edit_text(
         f"💪 Вы выбрали тренировку: {html.bold(workout.name)}!\n\n"
-        f"🔹 Тренировка состоит из {workout.exercises_count} упражнений.\n"
-        f"🔹 Приблизительное время тренировки - {workout.get_humanized_workout_duration("ru")}.",  # TODO: Change to i18n.current_locale
+        f"🔹 Тренировка состоит из {html.bold(workout.exercises_count)} упражнений.\n"
+        f"🔹 Приблизительное время тренировки - {html.bold(workout.get_humanized_workout_duration("ru"))}.",  # TODO: Change to i18n.current_locale
         reply_markup=await create_start_workout_keyboard(),
     )
     await callback_query.answer()

@@ -1,7 +1,9 @@
+import asyncio
 from logging import Logger
 from typing import Any, Awaitable, Callable
 
 from aiogram.dispatcher.middlewares.base import BaseMiddleware
+from aiogram.exceptions import TelegramRetryAfter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import TelegramObject
 
@@ -112,3 +114,18 @@ class AuthCheckMiddleware(BaseMiddleware):
                 raise UnauthorizedError
 
         return await handler(event, data)
+
+
+class RetryOnRateLimitsMiddleware(BaseMiddleware):
+
+    async def __call__(
+        self,
+        handler: Callable[[TelegramObject, dict], Awaitable[Any]],
+        event: TelegramObject,
+        data: dict,
+    ) -> Any:
+        try:
+            return await handler(event, data)
+        except TelegramRetryAfter as e:
+            await asyncio.sleep(e.retry_after)
+            return await handler(event, data)

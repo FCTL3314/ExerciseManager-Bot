@@ -6,6 +6,7 @@ from src.bot.services.shortcuts.commands import (
     REGISTER_COMMAND,
     ADD_EXERCISE_COMMAND,
 )
+from src.services.text import generate_progress_bar
 
 # Start
 START_MESSAGE = (
@@ -72,9 +73,17 @@ EXERCISE_DESCRIPTION_MESSAGE = (
     "<b>⏱️ Продолжительность:</b> {duration}\n"
 )
 EXERCISE_COMPLETED_MESSAGE = "✅ Упражнение <b>{name}</b> выполнено!"
-REST_PERIOD_TIMER_MESSAGE = "💤 Отдыхайте, осталось {seconds_left} секунд..."
+WORKOUT_REST_TIMER_MESSAGE = (
+    f"💤 Отдыхайте, осталось {html.bold("{seconds_left}")} секунд..."
+)
 WORKOUT_EXERCISE_TIMER_MESSAGE = (
-    "🔥 Выполняйте упражнение, осталось {seconds_left} секунд..."
+    f"🔥 Выполняйте упражнение, осталось {html.bold("{seconds_left}")} секунд..."
+)
+WORKOUT_REST_PROGRESS_MESSAGE = (
+    f"💤 Отдыхайте - {html.bold("{progress}%")}\n\n{{progress_bar}}"
+)
+WORKOUT_EXERCISE_PROGRESS_MESSAGE = (
+    f"🔥 Выполняйте упражнение - {html.bold("{progress}%")}\n\n{{progress_bar}}"
 )
 WORKOUT_COMPLETED_MESSAGE = "🎉 Тренировка закончена, ты молодец!"
 FAILED_TO_SEND_EXERCISE_IMAGE_MESSAGE = (
@@ -82,3 +91,31 @@ FAILED_TO_SEND_EXERCISE_IMAGE_MESSAGE = (
     "ссылку — возможно, она устарела или была указана некорректно. "
     "Попробуйте обновить ссылку на актуальную."
 )
+
+
+def get_workout_rest_progress_bar(progress: int) -> str:
+    progress_bar = generate_progress_bar(
+        progress,
+        bar_length=12,
+        filled_symbol=" 🌕 ",
+        partial_symbol="🌗",
+        empty_symbol=" 🌑 ",
+    )
+    return WORKOUT_REST_PROGRESS_MESSAGE.format(
+        progress_bar=progress_bar,
+        progress=progress,
+    )
+
+
+def get_workout_exercise_progress_bar(progress: int) -> str:
+    progress_bar = generate_progress_bar(
+        progress,
+        bar_length=12,
+        filled_symbol=" 🌕 ",
+        partial_symbol="🌗",
+        empty_symbol=" 🌑 ",
+    )
+    return WORKOUT_EXERCISE_PROGRESS_MESSAGE.format(
+        progress_bar=progress_bar,
+        progress=progress,
+    )

@@ -14,6 +14,7 @@ from src.bot.middlewares import (
     ServicesMiddleware,
     ClearStateOnErrorMiddleware,
     AuthCheckMiddleware,
+    RetryOnRateLimitsMiddleware,
 )
 from src.bot.services.shortcuts.commands import CommandsGroup
 from src.bot.types import Bot
@@ -62,6 +63,7 @@ class BotLoader(IBotLoader):  # TODO: Try to move some methods to lifecycle
         dp.update.middleware(ConfigMiddleware(self._config))
         dp.update.middleware(ServicesMiddleware(self._services))
         dp.update.middleware(SimpleI18nMiddleware(self._i18n))
+        dp.update.outer_middleware(RetryOnRateLimitsMiddleware())
         dp.update.outer_middleware(LoggingMiddleware(self._logger_group.general))
         dp.update.outer_middleware(ClearStateOnErrorMiddleware())
         dp.message.outer_middleware(

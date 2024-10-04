@@ -67,11 +67,13 @@ async def run_timer(
 
     previous_tick_result = None
     remaining_seconds = seconds
+    iteration_num = 0
 
     while remaining_seconds >= 0:
         kwargs = {
             "second": remaining_seconds,
             "previous_tick_result": previous_tick_result,
+            "iteration_num": iteration_num,
         }
 
         current_state = await state.get_state()
@@ -97,6 +99,7 @@ async def run_timer(
             await asyncio.sleep(remaining_sleep_time)
 
         remaining_seconds -= 1
+        iteration_num += 1
 
     await on_stop(**kwargs)  # noqa
     return previous_tick_result
