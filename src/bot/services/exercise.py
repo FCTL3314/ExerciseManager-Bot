@@ -18,11 +18,11 @@ from src.bot.services.shortcuts.message_templates import (
 )
 from src.bot.states.workout import StartWorkoutStates
 from src.services.business.workouts import WorkoutServiceProto
-from src.services.schedule import (
+from src.bot.services.schedule import (
     AiogramMessageScheduler,
     EditWorkoutProgressMessageCallback,
-    ResetWorkoutStateCallback,
     EditWorkoutTimerMessageCallback,
+    ResetWorkoutStateCallback,
 )
 
 
