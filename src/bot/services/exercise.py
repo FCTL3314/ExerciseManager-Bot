@@ -18,10 +18,11 @@ from src.bot.services.shortcuts.message_templates import (
 )
 from src.bot.states.workout import StartWorkoutStates
 from src.services.business.workouts import WorkoutServiceProto
-from src.services.timer import (
-    AiogramMessageTimer,
-    WorkoutTimerOnTickCallback,
-    WorkoutTimerOnStopCallback,
+from src.services.schedule import (
+    AiogramMessageScheduler,
+    EditWorkoutProgressMessageCallback,
+    ResetWorkoutStateCallback,
+    EditWorkoutTimerMessageCallback,
 )
 
 
@@ -62,29 +63,29 @@ async def handle_workout_exercise(
     else:
         await message.answer(exercise_text)
 
-    timer = AiogramMessageTimer(state=state)
+    timer = AiogramMessageScheduler(state=state)
 
     timer_message = await timer.run_timer(
         seconds=break_seconds,
-        tick_callback=WorkoutTimerOnTickCallback(
+        tick_callback=EditWorkoutTimerMessageCallback(
             message=message,
             total_seconds=break_seconds,
             message_template=WORKOUT_REST_TIMER_MESSAGE,
         ),
-        stop_callback=WorkoutTimerOnStopCallback(state=state),
+        stop_callback=ResetWorkoutStateCallback(state=state),
         stop_states=(StartWorkoutStates.skipping_exercise, None),
         pause_states=(StartWorkoutStates.paused,),
     )
 
     timer_message = await timer.run_timer(
         seconds=exercise_duration,
-        tick_callback=WorkoutTimerOnTickCallback(
+        tick_callback=EditWorkoutProgressMessageCallback(
             message=message,
             total_seconds=exercise_duration,
             progress_bar_generator=get_workout_exercise_progress_bar,
-            message_to_start_with=timer_message,
+            message_to_edit=timer_message,
         ),
-        stop_callback=WorkoutTimerOnStopCallback(state=state),
+        stop_callback=ResetWorkoutStateCallback(state=state),
         stop_states=(StartWorkoutStates.skipping_exercise, None),
         pause_states=(StartWorkoutStates.paused,),
     )

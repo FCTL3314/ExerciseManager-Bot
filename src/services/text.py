@@ -2,7 +2,7 @@ def generate_progress_bar(
     progress: int,
     bar_length: int = 20,
     filled_symbol: str = "█",
-    partial_symbol: str = "▓",
+    partial_symbol: str | None = None,
     empty_symbol: str = "░",
 ) -> str:
     """
@@ -15,6 +15,9 @@ def generate_progress_bar(
     :param empty_symbol: Symbol for the empty part of the progress bar.
     :return: A string representing the progress bar.
     """
+    if partial_symbol is None:
+        partial_symbol = empty_symbol
+
     total_units = bar_length
 
     progress_units = (progress / 100) * total_units

@@ -1,5 +1,6 @@
 import asyncio
 import time
+from abc import ABC, abstractmethod
 from typing import Iterable, Callable
 
 from aiogram.fsm.context import FSMContext
@@ -15,48 +16,41 @@ from src.constants import MIN_TIMER_MESSAGE_SECONDS_INTERVAL
 T = TypeVar("T")
 
 
-class TimerOnTickCallbackProto(Generic[T]):
+class SchedulerCallbackProto(Generic[T]):
 
     async def __call__(
         self, iteration_num: int, second: int, previous_tick_result: T
     ) -> T: ...
 
 
-class TimerOnStopCallbackProto(Generic[T]):
-
-    async def __call__(
-        self, iteration_num: int, second: int, previous_tick_result: T
-    ) -> T: ...
-
-
-class TimerProto(Protocol[T]):
+class SchedulerProto(Protocol[T]):
 
     async def run_timer(self) -> T: ...
 
 
-class AiogramTimerProto(Protocol[T]):
+class AiogramSchedulerProto(Protocol[T]):
 
     async def run_timer(
         self,
         seconds: int,
-        tick_callback: TimerOnTickCallbackProto[Message],
+        tick_callback: SchedulerCallbackProto[Message],
         stop_states: Iterable[StatesGroup] = None,
         pause_states: Iterable[StatesGroup] = None,
-        stop_callback: TimerOnStopCallbackProto | None = lambda: ...,
+        stop_callback: SchedulerCallbackProto[None] = lambda: ...,
     ) -> T: ...
 
 
-class AiogramMessageTimer(AiogramTimerProto[Message]):
+class AiogramMessageScheduler(AiogramSchedulerProto[Message]):
     def __init__(self, state: FSMContext) -> None:
         self._state = state
 
     async def run_timer(
         self,
         seconds: int,
-        tick_callback: TimerOnTickCallbackProto[Message],
+        tick_callback: SchedulerCallbackProto[Message],
         stop_states: Iterable[StatesGroup] = None,
         pause_states: Iterable[StatesGroup] = None,
-        stop_callback: TimerOnStopCallbackProto = lambda: ...,
+        stop_callback: SchedulerCallbackProto[None] = lambda: ...,
     ) -> Message:
         if seconds <= 0:
             raise ValueError("seconds must be a positive integer")
@@ -101,54 +95,88 @@ class AiogramMessageTimer(AiogramTimerProto[Message]):
         return previous_tick_result
 
 
-class WorkoutTimerOnTickCallback(TimerOnTickCallbackProto[Message]):
-
+class BaseEditWorkoutMessageCallback(SchedulerCallbackProto[Message], ABC):
     def __init__(
         self,
         message: Message,
         total_seconds: int,
-        message_template: str = None,
-        progress_bar_generator: Callable[[int], str] | None = None,
-        message_to_start_with: Message | None = None,
+        message_to_edit: Message | None = None,
     ) -> None:
         self._message = message
         self._total_seconds = total_seconds
-        self._message_template = message_template
-        self._progress_bar_generator = progress_bar_generator
-        self._message_to_start_with = message_to_start_with
+        self._message_to_edit = message_to_edit
+
+    async def _get_previous_message(
+        self, iteration_num: int, previous_tick_result: Message
+    ) -> Message:
+        if iteration_num == 0:
+            return self._message_to_edit
+        return previous_tick_result
+
+    @staticmethod
+    async def should_edit(iteration_num: int, second: int) -> bool:
+        return iteration_num == 0 or second % MIN_TIMER_MESSAGE_SECONDS_INTERVAL == 0
 
     async def __call__(
         self, iteration_num: int, second: int, previous_tick_result: Message
     ) -> Message:
-        if iteration_num == 0:
-            _previous_message = self._message_to_start_with
-        else:
-            _previous_message = previous_tick_result
+        previous_message = await self._get_previous_message(
+            iteration_num, previous_tick_result
+        )
 
-        if iteration_num != 0 and second % MIN_TIMER_MESSAGE_SECONDS_INTERVAL != 0:
-            return _previous_message
+        if not await self.should_edit(iteration_num, second):
+            return previous_message
 
-        if self._progress_bar_generator is not None:
-            progress = int(((self._total_seconds - second) / self._total_seconds) * 100)
-            progress = min(max(progress, 0), 100)
+        text = self._generate_text(second)
 
-            text = self._progress_bar_generator(progress)
-        else:
-            text = self._message_template.format(seconds_left=second)
-
-        if _previous_message is None:
+        if previous_message is None:
             return await self._message.answer(
                 text,
                 reply_markup=await create_active_workout_keyboard(),
             )
 
-        return await _previous_message.edit_text(
+        return await previous_message.edit_text(
             text,
-            reply_markup=_previous_message.reply_markup,
+            reply_markup=previous_message.reply_markup,
         )
 
+    @abstractmethod
+    def _generate_text(self, second: int) -> str: ...
 
-class WorkoutTimerOnStopCallback(TimerOnStopCallbackProto[None]):
+
+class EditWorkoutProgressMessageCallback(BaseEditWorkoutMessageCallback):
+    def __init__(
+        self,
+        message: Message,
+        total_seconds: int,
+        progress_bar_generator: Callable[[int], str],
+        message_to_edit: Message | None = None,
+    ) -> None:
+        super().__init__(message, total_seconds, message_to_edit)
+        self._progress_bar_generator = progress_bar_generator
+
+    def _generate_text(self, second: int) -> str:
+        progress = int(((self._total_seconds - second) / self._total_seconds) * 100)
+        progress = min(max(progress, 0), 100)
+        return self._progress_bar_generator(progress)
+
+
+class EditWorkoutTimerMessageCallback(BaseEditWorkoutMessageCallback):
+    def __init__(
+        self,
+        message: Message,
+        total_seconds: int,
+        message_template: str,
+        message_to_edit: Message | None = None,
+    ) -> None:
+        super().__init__(message, total_seconds, message_to_edit)
+        self._message_template = message_template
+
+    def _generate_text(self, second: int) -> str:
+        return self._message_template.format(seconds_left=second)
+
+
+class ResetWorkoutStateCallback(SchedulerCallbackProto[None]):
 
     def __init__(self, state: FSMContext) -> None:
         self._state = state

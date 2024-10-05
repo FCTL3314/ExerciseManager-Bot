@@ -79,9 +79,6 @@ WORKOUT_REST_TIMER_MESSAGE = (
 WORKOUT_EXERCISE_TIMER_MESSAGE = (
     f"🔥 Выполняйте упражнение, осталось {html.bold("{seconds_left}")} секунд..."
 )
-WORKOUT_REST_PROGRESS_MESSAGE = (
-    f"💤 Отдыхайте - {html.bold("{progress}%")}\n\n{{progress_bar}}"
-)
 WORKOUT_EXERCISE_PROGRESS_MESSAGE = (
     f"🔥 Выполняйте упражнение - {html.bold("{progress}%")}\n\n{{progress_bar}}"
 )
@@ -93,27 +90,12 @@ FAILED_TO_SEND_EXERCISE_IMAGE_MESSAGE = (
 )
 
 
-def get_workout_rest_progress_bar(progress: int) -> str:
-    progress_bar = generate_progress_bar(
-        progress,
-        bar_length=12,
-        filled_symbol=" 🌕 ",
-        partial_symbol="🌗",
-        empty_symbol=" 🌑 ",
-    )
-    return WORKOUT_REST_PROGRESS_MESSAGE.format(
-        progress_bar=progress_bar,
-        progress=progress,
-    )
-
-
 def get_workout_exercise_progress_bar(progress: int) -> str:
     progress_bar = generate_progress_bar(
         progress,
         bar_length=12,
-        filled_symbol=" 🌕 ",
-        partial_symbol="🌗",
-        empty_symbol=" 🌑 ",
+        filled_symbol=" ➡️ ",
+        empty_symbol=" ➖ ",
     )
     return WORKOUT_EXERCISE_PROGRESS_MESSAGE.format(
         progress_bar=progress_bar,
